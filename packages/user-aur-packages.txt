@@ -1,13 +1,6 @@
-# ==============================================================================
-# Pacotes AUR / Estrangeiros Instalados pelo Usuário
-# ==============================================================================
 antigravity
 antigravity-ide
 ayugram-desktop-bin
 google-chrome
-insync
-insync-dolphin
-jetbrains-toolbox
 microsoft-edge-stable-bin
 opera
-visual-studio-code-bin

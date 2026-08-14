@@ -1,19 +1,20 @@
-# 🚀 Setup Imortal (Linux / Arch / BigLinux)
+# 🚀 Setup Imortal (BigLinux Based)
 
-> Estrutura modular, idempotente e reproduzível para automação de ambiente de desenvolvimento e sistema operacional em distribuições baseadas em Arch Linux (BigLinux, Manjaro, Arch Linux, EndeavourOS).
+> Estrutura modular, idempotente e reproduzível com todas as customizações, ferramentas de desenvolvimento, IDEs, drivers e dotfiles instalados **em cima de uma instalação padrão do BigLinux**.
 > Inspirado na filosofia do vídeo *"Meu Setup Imortal"* do Fabio Akita.
 
 ---
 
-## 📌 Visão Geral
+## 📌 Filosofia do Projeto
 
-Este repositório permite que você restaure e configure todo o seu ambiente de trabalho (programas, CLI, IDEs, drivers, swap, dotfiles) em poucos minutos após uma nova instalação do sistema.
+Como a base do sistema é o **BigLinux**, todo o ecossistema padrão da distribuição (Centro de Controle, temas base, suíte de áudio, codecs e pacotes do sistema) já vem pré-configurado de fábrica.
 
-### 🛡️ Princípios de Design
-1. **Idempotência**: Cada script pode ser executado múltiplas vezes de forma segura. Se um aplicativo ou configuração já existir, ele não será reinstalado nem corrompido.
-2. **Modularidade**: Responsabilidades isoladas por camadas (sistema, drivers, CLI, GUI, dev runtimes, dotfiles).
-3. **Evolução Contínua**: O comando de **snapshot** (`./setup.sh --snapshot`) atualiza a lista de pacotes sempre que você instala novos softwares no dia a dia.
-4. **Symlinks Seguros**: As configurações (`configs/`) são ligadas diretamente ao `$HOME` com backup automático de arquivos preexistentes.
+Este repositório foca exclusivamente nas **suas personalizações e ferramentas de trabalho**:
+1. **Ferramentas de Desenvolvimento & CLI**: GitHub CLI (`gh`), FNM / Node.js, Python, Docker, C/C++ toolchain, Antigravity (`agy`).
+2. **IDEs & Editores**: Visual Studio Code Oficial, JetBrains Toolbox.
+3. **Aplicativos de Produtividade**: Google Chrome, Microsoft Edge, Opera, Ayugram (Telegram), Insync + Dolphin.
+4. **Hardware & Otimizações**: Driver Híbrido Nvidia GT 740M (`390xx` + Bumblebee com BusID), Swap secundária com prioridade no `fstab`, ativação do `fstrim.timer` e limpeza de serviços de boot.
+5. **Dotfiles**: Aliases de terminal (`.bash_aliases`), configurações do Git (`.gitconfig`, `.gitignore_global`) e preferências do VS Code (`settings.json`).
 
 ---
 
@@ -23,13 +24,12 @@ Este repositório permite que você restaure e configure todo o seu ambiente de 
 setup-linux/
 ├── setup.sh                       # 🎛️ Script mestre com menu interativo e flags CLI
 ├── README.md                      # 📖 Este guia de uso
-├── .gitignore                     # 🔒 Bloqueio de arquivos sensíveis e backups locais
+├── .gitignore                     # 🔒 Bloqueio de arquivos locais e backups
 │
-├── packages/                      # 📦 Listas declarativas de pacotes
-│   ├── pacman-base.txt            # Pacotes essenciais de sistema e utilitários
-│   ├── pacman-dev.txt             # Pacotes para compilação, linguagens e docker
-│   ├── pacman-all-installed.txt   # Snapshot de todos os pacotes nativos da máquina
-│   ├── aur-packages.txt           # Pacotes instalados via AUR (yay/paru)
+├── packages/                      # 📦 Listas declarativas (apenas pós-BigLinux)
+│   ├── user-native-packages.txt   # Pacotes nativos adicionados (gcc, docker, rclone, etc.)
+│   ├── user-aur-packages.txt      # Pacotes AUR (chrome, edge, insync, vscode, ayugram, etc.)
+│   ├── hardware-drivers.txt       # Stack Nvidia 390xx, Bumblebee e módulos de kernel
 │   └── flatpaks.txt               # Aplicativos Flatpak
 │
 ├── scripts/                       # ⚡ Scripts executáveis modulares
@@ -37,10 +37,10 @@ setup-linux/
 │   ├── 00-system-init.sh          # Pacman tweaks (parallel, candy), fstrim e yay
 │   ├── 01-hardware-gpu.sh         # Bumblebee / Nvidia 390xx e Swap prioritária
 │   ├── 02-cli-tools.sh            # GitHub CLI (gh), zsh, starship, eza, bat, fzf, etc.
-│   ├── 03-gui-apps.sh             # VS Code oficial, JetBrains Toolbox, navegadores
+│   ├── 03-gui-apps.sh             # VS Code oficial, JetBrains Toolbox, navegadores, insync
 │   ├── 04-dev-runtimes.sh         # C/C++, Python, FNM/Node.js, Docker
 │   ├── 05-dotfiles-sync.sh        # Criação de symlinks com backup seguro
-│   └── 99-snapshot.sh             # Exportador de estado atual da máquina
+│   └── 99-snapshot.sh             # Exportador do estado atual da máquina
 │
 ├── configs/                       # ⚙️ Dotfiles centralizados e versionados
 │   ├── bash/.bash_aliases         # Aliases modernos (ls->eza, cat->bat, gpu->optirun)
@@ -58,23 +58,22 @@ setup-linux/
 ## 💻 Como Usar
 
 ### 1. Menu Interativo
-Para abrir o painel interativo de configuração:
 ```bash
 ./setup.sh
 ```
 
-### 2. Linha de Comando (Atalhos Rápidos)
+### 2. Atalhos Diretos via CLI
 ```bash
-# Executar a instalação completa de todas as etapas
+# Executar a instalação e configuração completa
 ./setup.sh --all
 
-# Executar diagnóstico do ambiente (ver o que está instalado)
+# Diagnóstico de ferramentas instaladas
 ./setup.sh --check
 
-# Sincronizar dotfiles (cria symlinks para ~/.bash_aliases, ~/.gitconfig, etc.)
+# Sincronizar dotfiles (symlinks para ~/.bash_aliases, ~/.gitconfig, etc.)
 ./setup.sh --dotfiles
 
-# Atualizar as listas de pacotes com o estado atual do sistema
+# Atualizar as listas com novos programas instalados
 ./setup.sh --snapshot
 ```
 
@@ -88,43 +87,8 @@ O **GitHub CLI (`gh`)** já está instalado! Para conectar seu repositório ao s
    ```bash
    gh auth login
    ```
-   *(Siga as instruções na tela escolhendo GitHub.com > HTTPS ou SSH > Login via Browser).*
-
-2. **Crie e envie o repositório automaticamente**:
+2. **Crie e envie o repositório**:
    ```bash
+   cd ~/Projetos/setup-linux
    gh repo create setup-linux --public --source=. --remote=origin --push
    ```
-   *(Ou `--private` se preferir mantê-lo privado).*
-
----
-
-## 🔄 Como Evoluir o Setup no Dia a Dia
-
-Sempre que você instalar novos programas ou modificar configurações:
-
-1. **Gere um novo snapshot**:
-   ```bash
-   ./setup.sh --snapshot
-   ```
-2. **Commit e envie as alterações**:
-   ```bash
-   git add .
-   git commit -m "feat: adiciona novos pacotes e atualiza configs"
-   git push
-   ```
-
----
-
-## 🖥️ Como Restaurar em uma Nova Máquina
-
-Em qualquer nova instalação baseada em Arch:
-
-```bash
-# 1. Clone seu repositório
-git clone https://github.com/SEU_USUARIO/setup-linux.git ~/Projetos/setup-linux
-
-# 2. Acesse e execute
-cd ~/Projetos/setup-linux
-chmod +x setup.sh scripts/*.sh tests/*.sh
-./setup.sh --all
-```

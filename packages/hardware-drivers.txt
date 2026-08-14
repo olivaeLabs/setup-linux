@@ -1,0 +1,16 @@
+# ==============================================================================
+# Drivers e Módulos de Hardware (Asus K46CB / Nvidia GT 740M 390xx / Realtek)
+# ==============================================================================
+bbswitch
+bumblebee
+lib32-nvidia-390xx-utils
+lib32-primus
+libxnvctrl-390xx
+linux612-bbswitch
+linux612-nvidia-390xx
+linux612-r8168
+nvidia-390xx-settings
+nvidia-390xx-utils
+primus
+virtualgl
+xf86-video-intel

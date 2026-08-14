@@ -1,16 +1,22 @@
 # ==============================================================================
-# Pacotes Nativos de Desenvolvimento
+# Pacotes Nativos Instalados pelo Usuário (Pós-Instalação do BigLinux)
 # ==============================================================================
 base-devel
+bison
 cmake
+debugedit
 docker
 docker-compose
 gcc
 gdb
-git
 github-cli
+htop
+libdispatch
 make
 openssh
 python
 python-pip
 python-virtualenv
+rclone
+rnnoise
+source-highlight

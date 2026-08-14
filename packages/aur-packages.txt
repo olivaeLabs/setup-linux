@@ -1,6 +1,0 @@
-antigravity
-antigravity-ide
-ayugram-desktop-bin
-google-chrome
-microsoft-edge-stable-bin
-opera

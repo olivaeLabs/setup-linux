@@ -1,6 +1,6 @@
 # 🚀 Setup Imortal (BigLinux Based)
 
-> Estrutura modular, idempotente e reproduzível com todas as customizações, ferramentas de desenvolvimento, IDEs, drivers e dotfiles instalados **em cima de uma instalação padrão do BigLinux**.
+> Estrutura modular, idempotente e reproduzível com todas as customizações, ferramentas de desenvolvimento, IDEs, drivers, dotfiles e **WebApps priorizados** em cima de uma instalação padrão do BigLinux.
 > Inspirado na filosofia do vídeo *"Meu Setup Imortal"* do Fabio Akita.
 
 ---
@@ -9,12 +9,19 @@
 
 Como a base do sistema é o **BigLinux**, todo o ecossistema padrão da distribuição (Centro de Controle, temas base, suíte de áudio, codecs e pacotes do sistema) já vem pré-configurado de fábrica.
 
-Este repositório foca exclusivamente nas **suas personalizações e ferramentas de trabalho**:
-1. **Ferramentas de Desenvolvimento & CLI**: GitHub CLI (`gh`), FNM / Node.js, Python, Docker, C/C++ toolchain, Antigravity (`agy`).
-2. **IDEs & Editores**: Visual Studio Code Oficial, JetBrains Toolbox.
-3. **Aplicativos de Produtividade**: Google Chrome, Microsoft Edge, Opera, Ayugram (Telegram), Insync + Dolphin.
-4. **Hardware & Otimizações**: Driver Híbrido Nvidia GT 740M (`390xx` + Bumblebee com BusID), Swap secundária com prioridade no `fstab`, ativação do `fstrim.timer` e limpeza de serviços de boot.
-5. **Dotfiles**: Aliases de terminal (`.bash_aliases`), configurações do Git (`.gitconfig`, `.gitignore_global`) e preferências do VS Code (`settings.json`).
+### 🌐 Regra de Ouro: Priorização de WebApps (PWAs)
+Em vez de instalar dezenas de aplicativos pesados em Electron (como Spotify, WhatsApp, Discord, Notion, YouTube, etc.) que consomem gigabytes de memória RAM e processos isolados, este setup **prioriza WebApps integrados via BigLinux WebApps (`big-webapps-exec`)**:
+- Consumo mínimo de memória e CPU.
+- Aceleração gráfica nativa compartilhada.
+- Inicialização instantânea e atualização automática.
+
+### 🛠️ Pilares do Setup
+1. **WebApps & PWAs**: WhatsApp, Spotify, Discord, YouTube, Telegram Web, Google Drive, Calendar, Jitsi, etc. (em `configs/webapps/`).
+2. **Ferramentas de Desenvolvimento & CLI**: GitHub CLI (`gh`), FNM / Node.js, Python, Docker, C/C++ toolchain, Antigravity (`agy`).
+3. **IDEs & Editores**: Visual Studio Code Oficial, JetBrains Toolbox.
+4. **Aplicativos de Produtividade**: Google Chrome, Microsoft Edge, Opera, Ayugram, Insync + Dolphin.
+5. **Hardware & Otimizações**: Driver Híbrido Nvidia GT 740M (`390xx` + Bumblebee com BusID), Swap secundária com prioridade no `fstab`, ativação do `fstrim.timer` e limpeza de serviços de boot.
+6. **Dotfiles**: Aliases de terminal (`.bash_aliases`), configurações do Git (`.gitconfig`, `.gitignore_global`) e preferências do VS Code (`settings.json`).
 
 ---
 
@@ -40,9 +47,11 @@ setup-linux/
 │   ├── 03-gui-apps.sh             # VS Code oficial, JetBrains Toolbox, navegadores, insync
 │   ├── 04-dev-runtimes.sh         # C/C++, Python, FNM/Node.js, Docker
 │   ├── 05-dotfiles-sync.sh        # Criação de symlinks com backup seguro
+│   ├── 06-webapps.sh              # 🌐 Restauração de WebApps priorizados sobre Electron
 │   └── 99-snapshot.sh             # Exportador do estado atual da máquina
 │
 ├── configs/                       # ⚙️ Dotfiles centralizados e versionados
+│   ├── webapps/                   # 🌐 Declaração de WebApps (webapps.json e ícones)
 │   ├── bash/.bash_aliases         # Aliases modernos (ls->eza, cat->bat, gpu->optirun)
 │   ├── git/.gitconfig             # Configuração padrão de Git e aliases
 │   ├── git/.gitignore_global      # Regras globais de ignore
@@ -64,8 +73,11 @@ setup-linux/
 
 ### 2. Atalhos Diretos via CLI
 ```bash
-# Executar a instalação e configuração completa
+# Executar a instalação e configuração completa (incluindo WebApps)
 ./setup.sh --all
+
+# Restaurar apenas os WebApps
+./setup.sh --webapps
 
 # Diagnóstico de ferramentas instaladas
 ./setup.sh --check
@@ -76,19 +88,3 @@ setup-linux/
 # Atualizar as listas com novos programas instalados
 ./setup.sh --snapshot
 ```
-
----
-
-## 🐙 Publicando este Repositório no GitHub
-
-O **GitHub CLI (`gh`)** já está instalado! Para conectar seu repositório ao seu perfil do GitHub:
-
-1. **Autentique no GitHub**:
-   ```bash
-   gh auth login
-   ```
-2. **Crie e envie o repositório**:
-   ```bash
-   cd ~/Projetos/setup-linux
-   gh repo create setup-linux --public --source=. --remote=origin --push
-   ```

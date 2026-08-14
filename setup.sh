@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: setup.sh (Master Entrypoint)
-# Descrição: Orquestrador interativo do Setup Imortal
+# Descrição: Orquestrador interativo do Setup Imortal (BigLinux Based)
 # ==============================================================================
 set -euo pipefail
 
@@ -16,6 +16,7 @@ run_all() {
     "$SCRIPT_DIR/scripts/03-gui-apps.sh"
     "$SCRIPT_DIR/scripts/04-dev-runtimes.sh"
     "$SCRIPT_DIR/scripts/05-dotfiles-sync.sh"
+    "$SCRIPT_DIR/scripts/06-webapps.sh"
     "$SCRIPT_DIR/scripts/99-snapshot.sh"
     "$SCRIPT_DIR/tests/check-environment.sh"
     log_success "🎉 Configuração completa do Setup Imortal finalizada com sucesso!"
@@ -31,7 +32,7 @@ show_menu() {
     echo "  ███████║███████╗   ██║   ╚██████╔╝██║         ██║██║ ╚═╝ ██║╚██████╔╝██║  ██║   ██║   ██║  ██║███████╗"
     echo "  ╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝         ╚═╝╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝"
     echo -e "${COLOR_RESET}"
-    echo -e "${COLOR_BOLD}${COLOR_BLUE}    Setup Imortal para Linux (Arch / BigLinux / Manjaro) - Inspirado em Fabio Akita${COLOR_RESET}\n"
+    echo -e "${COLOR_BOLD}${COLOR_BLUE}    Setup Imortal para BigLinux - Inspirado em Fabio Akita (WebApps Prioritários)${COLOR_RESET}\n"
 
     echo -e "${COLOR_BOLD}Escolha uma opção:${COLOR_RESET}"
     echo -e "  ${COLOR_GREEN}[1]${COLOR_RESET} Instalação Completa (Tudo)"
@@ -41,10 +42,11 @@ show_menu() {
     echo -e "  ${COLOR_CYAN}[5]${COLOR_RESET} Aplicativos Gráficos, VS Code & JetBrains (03-gui-apps.sh)"
     echo -e "  ${COLOR_CYAN}[6]${COLOR_RESET} Runtimes de Dev, Node & Docker (04-dev-runtimes.sh)"
     echo -e "  ${COLOR_CYAN}[7]${COLOR_RESET} Sincronizar Dotfiles / Symlinks (05-dotfiles-sync.sh)"
-    echo -e "  ${COLOR_YELLOW}[8]${COLOR_RESET} Snapshot do Sistema Atual (99-snapshot.sh)"
-    echo -e "  ${COLOR_MAGENTA}[9]${COLOR_RESET} Diagnóstico do Ambiente (check-environment.sh)"
+    echo -e "  ${COLOR_CYAN}[8]${COLOR_RESET} Instalar e Restaurar WebApps / PWAs (06-webapps.sh)"
+    echo -e "  ${COLOR_YELLOW}[9]${COLOR_RESET} Snapshot do Sistema Atual (99-snapshot.sh)"
+    echo -e "  ${COLOR_MAGENTA}[10]${COLOR_RESET} Diagnóstico do Ambiente (check-environment.sh)"
     echo -e "  ${COLOR_RED}[0]${COLOR_RESET} Sair\n"
-    read -r -p "Digite a opção desejada [0-9]: " choice
+    read -r -p "Digite a opção desejada [0-10]: " choice
     echo ""
 
     case "$choice" in
@@ -55,8 +57,9 @@ show_menu() {
         5) "$SCRIPT_DIR/scripts/03-gui-apps.sh" ;;
         6) "$SCRIPT_DIR/scripts/04-dev-runtimes.sh" ;;
         7) "$SCRIPT_DIR/scripts/05-dotfiles-sync.sh" ;;
-        8) "$SCRIPT_DIR/scripts/99-snapshot.sh" ;;
-        9) "$SCRIPT_DIR/tests/check-environment.sh" ;;
+        8) "$SCRIPT_DIR/scripts/06-webapps.sh" ;;
+        9) "$SCRIPT_DIR/scripts/99-snapshot.sh" ;;
+        10) "$SCRIPT_DIR/tests/check-environment.sh" ;;
         0) echo -e "${COLOR_GREEN}Até mais!${COLOR_RESET}"; exit 0 ;;
         *) log_error "Opção inválida!"; exit 1 ;;
     esac
@@ -69,6 +72,7 @@ if [ $# -gt 0 ]; then
         --check|-c) "$SCRIPT_DIR/tests/check-environment.sh" ;;
         --snapshot|-s) "$SCRIPT_DIR/scripts/99-snapshot.sh" ;;
         --dotfiles|-d) "$SCRIPT_DIR/scripts/05-dotfiles-sync.sh" ;;
+        --webapps|-w) "$SCRIPT_DIR/scripts/06-webapps.sh" ;;
         --help|-h)
             echo "Uso: ./setup.sh [OPÇÃO]"
             echo "Opções:"
@@ -76,6 +80,7 @@ if [ $# -gt 0 ]; then
             echo "  --check, -c      Executa diagnóstico do ambiente"
             echo "  --snapshot, -s   Gera snapshot dos pacotes instalados"
             echo "  --dotfiles, -d   Sincroniza apenas os dotfiles"
+            echo "  --webapps, -w    Restaura e configura os WebApps"
             echo "  --help, -h       Exibe esta ajuda"
             exit 0
             ;;

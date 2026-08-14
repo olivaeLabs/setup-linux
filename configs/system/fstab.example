@@ -1,0 +1,10 @@
+# ==============================================================================
+# Exemplo de configuração de fstab com Swap de Prioridade Alta (Setup Imortal)
+# ==============================================================================
+
+# Partição Swap Secundária com prioridade maior (pri=10) para uso preferencial
+UUID=5b59608a-773c-44ae-8407-24342edd3d60 none swap defaults,pri=10 0 0
+
+# Exemplo de Btrfs com compressão ZSTD e discard assíncrono (SSD)
+# UUID=d4d67eee-af5e-4a52-a854-629ff1840b87 /              btrfs   subvol=/@,defaults,noatime,compress-force=zstd,discard=async 0 0
+# UUID=d4d67eee-af5e-4a52-a854-629ff1840b87 /home          btrfs   subvol=/@home,defaults,noatime,compress-force=zstd,discard=async 0 0

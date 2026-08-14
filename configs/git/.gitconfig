@@ -1,0 +1,20 @@
+[init]
+    defaultBranch = main
+[core]
+    editor = code --wait
+    excludesfile = ~/.gitignore_global
+    autocrlf = input
+[pull]
+    rebase = false
+[push]
+    autoSetupRemote = true
+[color]
+    ui = auto
+[alias]
+    s = status -sb
+    co = checkout
+    br = branch
+    ci = commit
+    st = status
+    last = log -1 HEAD
+    hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short

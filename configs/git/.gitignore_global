@@ -1,0 +1,27 @@
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Editor configs & workspaces
+.idea/
+*.swp
+*.swo
+*~
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Environment variables & secrets
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Logs & temporary files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

@@ -1,0 +1,16 @@
+# Backups gerados pelo dotfiles-sync
+*.bak.*
+
+# Temporários e caches
+/tmp/
+*.swp
+*~
+.DS_Store
+
+# Chaves privadas e segredos
+*.pem
+*.key
+.env.local
+.env.*.local
+id_rsa
+id_ed25519

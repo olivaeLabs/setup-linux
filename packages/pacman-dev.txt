@@ -1,0 +1,16 @@
+# ==============================================================================
+# Pacotes Nativos de Desenvolvimento
+# ==============================================================================
+base-devel
+cmake
+docker
+docker-compose
+gcc
+gdb
+git
+github-cli
+make
+openssh
+python
+python-pip
+python-virtualenv

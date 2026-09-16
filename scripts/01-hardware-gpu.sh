@@ -6,9 +6,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 source "$SCRIPT_DIR/lib/utils.sh"
 
-log_section "01 - Hardware, Drivers de Vídeo (Bumblebee) e Swap"
+log_section "01 - Hardware, Drivers de Vídeo (Bumblebee), Swap e Bluetooth"
 
 # 1. Configuração de Vídeo Híbrido (Intel Ivy Bridge + Nvidia GT 740M 390xx)
 if lspci | grep -qi "nvidia"; then
@@ -54,4 +55,30 @@ if blkid | grep -q "$SWAP_UUID"; then
     log_success "Swap configurada com sucesso!"
 fi
 
+# 3. Configuração de Bluetooth Realtek e Otimizações de Áudio (WirePlumber)
+if lsusb | grep -qi "0bda:c822"; then
+    log_info "Adaptador Realtek RTL8822CE Bluetooth detectado."
+    
+    # Kernel Modprobe (Desativa autosuspend e deep sleep de Wi-Fi compartilhado)
+    if [ -f "$ROOT_DIR/configs/system/bluetooth-realtek.conf" ]; then
+        sudo cp "$ROOT_DIR/configs/system/bluetooth-realtek.conf" /etc/modprobe.d/bluetooth-realtek.conf
+    fi
+
+    # BlueZ Tweaks
+    if [ -f /etc/bluetooth/main.conf ]; then
+        sudo sed -i 's/^#\?JustWorksRepairing.*/JustWorksRepairing = always/' /etc/bluetooth/main.conf
+        sudo sed -i 's/^#\?FastConnectable.*/FastConnectable = true/' /etc/bluetooth/main.conf
+        sudo sed -i 's/^#\?AutoEnable.*/AutoEnable = true/' /etc/bluetooth/main.conf
+    fi
+
+    # WirePlumber Tweaks
+    if [ -f "$ROOT_DIR/configs/system/51-bluez-config.conf" ]; then
+        sudo mkdir -p /etc/wireplumber/wireplumber.conf.d/
+        sudo cp "$ROOT_DIR/configs/system/51-bluez-config.conf" /etc/wireplumber/wireplumber.conf.d/51-bluez-config.conf
+    fi
+
+    log_success "Otimizações de Bluetooth e Áudio aplicadas com sucesso!"
+fi
+
 log_success "Etapa 01 concluída com sucesso!"
+

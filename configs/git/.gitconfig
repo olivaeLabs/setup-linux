@@ -18,3 +18,9 @@
     st = status
     last = log -1 HEAD
     hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+[credential "https://github.com"]
+	helper = 
+	helper = !/home/marcos/.local/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/home/marcos/.local/bin/gh auth git-credential

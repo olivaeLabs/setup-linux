@@ -1,6 +1,9 @@
 antigravity
+antigravity-cli
 antigravity-ide
 ayugram-desktop-bin
+github-copilot-app-bin
+github-copilot-cli-bin
 google-chrome
 microsoft-edge-stable-bin
 opera

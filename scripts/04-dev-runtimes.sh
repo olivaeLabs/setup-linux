@@ -45,9 +45,40 @@ else
     log_success "Docker já está instalado: $(docker --version)"
 fi
 
-# 5. Antigravity CLI (agy)
+# 5. Java / SDKMAN (Java 21 LTS Padronizado)
+if [ ! -d "$HOME/.sdkman" ]; then
+    log_info "Instalando SDKMAN!..."
+    curl -s "https://get.sdkman.io" | bash || true
+    [ -f "$HOME/.sdkman/etc/config" ] && sed -i 's/sdkman_auto_answer=false/sdkman_auto_answer=true/' "$HOME/.sdkman/etc/config"
+fi
+
+if [ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]; then
+    source "$HOME/.sdkman/bin/sdkman-init.sh"
+    if ! command -v java &>/dev/null; then
+        log_info "Instalando Java 21 LTS via SDKMAN..."
+        sdk install java 21.0.12+1.1-tem || true
+        sdk default java 21.0.12+1.1-tem || true
+    fi
+    log_success "SDKMAN / Java configurado: $(java -version 2>&1 | head -n 1)"
+fi
+
+# 6. Android SDK & CLI
+if [ ! -f "$HOME/.local/bin/android" ]; then
+    log_info "Instalando Google Android CLI..."
+    curl -fsSL https://dl.google.com/android/cli/latest/linux_x86_64/install.sh | bash || true
+fi
+
+if [ -d "$HOME/Android/Sdk/cmdline-tools/latest/bin" ]; then
+    for tool in "$HOME/Android/Sdk/cmdline-tools/latest/bin/"*; do
+        [ -f "$tool" ] && ln -sf "$tool" "$HOME/.local/bin/$(basename "$tool")"
+    done
+    log_success "Android SDK cmdline-tools vinculados em ~/.local/bin"
+fi
+
+# 7. Antigravity CLI (agy)
 if command -v agy &>/dev/null; then
     log_success "Antigravity CLI (agy) detectado: $(which agy)"
 fi
 
 log_success "Etapa 04 concluída com sucesso!"
+

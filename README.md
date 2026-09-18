@@ -17,7 +17,7 @@ Em vez de instalar dezenas de aplicativos pesados em Electron (como Spotify, Wha
 
 ### 🛠️ Pilares do Setup
 1. **WebApps & PWAs**: WhatsApp, Spotify, Discord, YouTube, Telegram Web, Google Drive, Calendar, Jitsi, etc. (em `configs/webapps/`).
-2. **Ferramentas de Desenvolvimento & CLI**: GitHub CLI (`gh`), FNM / Node.js, Python, Docker, C/C++ toolchain, Antigravity (`agy`).
+2. **Ferramentas de Desenvolvimento & CLI**: GitHub CLI (`gh`), OpenCode CLI e Desktop, FNM / Node.js, Python, Docker, C/C++ toolchain, Antigravity (`agy`).
 3. **IDEs & Editores**: Visual Studio Code Oficial, JetBrains Toolbox.
 4. **Aplicativos de Produtividade**: Google Chrome, Microsoft Edge, Opera, Ayugram, Insync + Dolphin.
 5. **Hardware & Otimizações**: Driver Híbrido Nvidia GT 740M (`390xx` + Bumblebee com BusID), Swap secundária com prioridade no `fstab`, ativação do `fstrim.timer` e limpeza de serviços de boot.
@@ -48,6 +48,7 @@ setup-linux/
 │   ├── 04-dev-runtimes.sh         # C/C++, Python, FNM/Node.js, Docker
 │   ├── 05-dotfiles-sync.sh        # Criação de symlinks com backup seguro
 │   ├── 06-webapps.sh              # 🌐 Restauração de WebApps priorizados sobre Electron
+│   ├── 07-opencode.sh             # OpenCode CLI e Desktop (AUR ou fallback sem root)
 │   └── 99-snapshot.sh             # Exportador do estado atual da máquina
 │
 ├── configs/                       # ⚙️ Dotfiles centralizados e versionados
@@ -81,6 +82,9 @@ setup-linux/
 
 # Diagnóstico de ferramentas instaladas
 ./setup.sh --check
+
+# Instalar OpenCode CLI e Desktop
+./setup.sh --opencode
 
 # Sincronizar dotfiles (symlinks para ~/.bash_aliases, ~/.gitconfig, etc.)
 ./setup.sh --dotfiles

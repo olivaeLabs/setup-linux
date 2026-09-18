@@ -31,6 +31,8 @@ echo -e "${COLOR_BOLD}${COLOR_CYAN}▶ Ferramentas Solicitadas:${COLOR_RESET}"
 check_cmd "GitHub CLI (gh)" "gh" "gh --version"
 check_cmd "VS Code (code)" "code" "code --version"
 check_cmd "JetBrains Toolbox" "jetbrains-toolbox" "jetbrains-toolbox --version || echo 'OK'"
+check_cmd "OpenCode CLI" "opencode" "opencode --version"
+check_cmd "OpenCode Desktop" "opencode-desktop" "opencode-desktop --appimage-version"
 
 echo -e "\n${COLOR_BOLD}${COLOR_CYAN}▶ Ferramentas de Desenvolvimento:${COLOR_RESET}"
 check_cmd "Git" "git" "git --version"

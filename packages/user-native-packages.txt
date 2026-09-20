@@ -1,22 +1,32 @@
 # ==============================================================================
-# Pacotes Nativos Instalados pelo Usuário (Pós-Instalação do BigLinux)
+# Pacotes Nativos Instalados pelo Usuário (Setup Imortal / Arch Linux)
 # ==============================================================================
 base-devel
+bat
 bison
+btop
 cmake
 debugedit
 docker
 docker-compose
+eza
+fzf
 gcc
 gdb
 github-cli
 htop
 libdispatch
 make
+opencode
 openssh
 python
 python-pip
 python-virtualenv
 rclone
+ripgrep
 rnnoise
 source-highlight
+starship
+zellij
+zoxide
+zsh

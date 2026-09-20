@@ -44,12 +44,13 @@ CLI_PKGS=(
     htop
     btop
     tmux
+    zellij
     unzip
     zip
     rsync
-    neofetch
     starship
     zsh
+    opencode
 )
 
 log_info "Instalando utilitários de terminal essenciais..."

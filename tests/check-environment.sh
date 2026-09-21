@@ -20,7 +20,7 @@ check_cmd() {
 
     if command -v "$cmd" &>/dev/null; then
         local ver
-        ver=$(eval "$version_cmd" 2>&1 | head -n 1)
+        ver=$( (eval "$version_cmd" 2>&1 || true) | head -n 1 )
         printf "  %-22s : ${COLOR_GREEN}✔ INSTALADO${COLOR_RESET}  ${COLOR_GRAY}(%s)${COLOR_RESET}\n" "$name" "$ver"
     else
         printf "  %-22s : ${COLOR_RED}✘ AUSENTE${COLOR_RESET}\n" "$name"
@@ -33,6 +33,7 @@ check_cmd "VS Code (code)" "code" "code --version"
 check_cmd "JetBrains Toolbox" "jetbrains-toolbox" "jetbrains-toolbox --version || echo 'OK'"
 check_cmd "OpenCode CLI" "opencode" "opencode --version"
 check_cmd "OpenCode Desktop" "opencode-desktop" "opencode-desktop --appimage-version"
+check_cmd "Cursor IDE" "cursor" "cursor --version"
 
 echo -e "\n${COLOR_BOLD}${COLOR_CYAN}▶ Ferramentas de Desenvolvimento:${COLOR_RESET}"
 check_cmd "Git" "git" "git --version"
@@ -69,7 +70,7 @@ check_cmd "AUR Helper (yay)" "yay" "yay --version"
 check_cmd "Bumblebee / Optirun" "optirun" "optirun --version || echo 'Bumblebee daemon'"
 
 echo -e "\n${COLOR_BOLD}${COLOR_CYAN}▶ Dotfiles e Symlinks:${COLOR_RESET}"
-for link in "$HOME/.bash_aliases" "$HOME/.gitconfig" "$HOME/.gitignore_global" "$HOME/.config/Code/User/settings.json"; do
+for link in "$HOME/.bash_aliases" "$HOME/.gitconfig" "$HOME/.gitignore_global" "$HOME/.config/Code/User/settings.json" "$HOME/.config/Cursor/User/settings.json"; do
     if [ -L "$link" ]; then
         printf "  %-32s : ${COLOR_GREEN}✔ SYMLINK ATIVO${COLOR_RESET} -> %s\n" "$link" "$(readlink -f "$link")"
     elif [ -f "$link" ]; then

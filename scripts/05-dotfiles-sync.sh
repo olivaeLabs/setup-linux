@@ -73,8 +73,9 @@ fi
 link_file "$CONFIGS_DIR/git/.gitconfig" "$HOME/.gitconfig"
 link_file "$CONFIGS_DIR/git/.gitignore_global" "$HOME/.gitignore_global"
 
-# 4. Configurações do VS Code
+# 4. Configurações do VS Code e Cursor IDE
 link_file "$CONFIGS_DIR/vscode/settings.json" "$HOME/.config/Code/User/settings.json"
+link_file "$CONFIGS_DIR/vscode/settings.json" "$HOME/.config/Cursor/User/settings.json"
 
 # 5. Configuração do Starship (prompt responsivo e sem avisos em /mnt/c)
 link_file "$CONFIGS_DIR/starship/starship.toml" "$HOME/.config/starship.toml"

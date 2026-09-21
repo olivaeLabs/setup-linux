@@ -75,7 +75,20 @@ else
     log_success "Visual Studio Code já está instalado: $(code --version 2>/dev/null | head -n1 || echo 'disponível')"
 fi
 
-# 3. Aplicativos adicionais mapeados da máquina (Browsers, Insync, Ayugram)
+# 3. Cursor IDE
+if ! command -v cursor &>/dev/null && [ ! -f "$HOME/.local/bin/cursor" ]; then
+    log_info "Instalando Cursor IDE via AUR ($AUR_HELPER)..."
+    if [ -n "$AUR_HELPER" ]; then
+        $AUR_HELPER -S --needed --noconfirm cursor-bin || true
+    fi
+    if command -v cursor &>/dev/null; then
+        log_success "Cursor IDE instalado com sucesso!"
+    fi
+else
+    log_success "Cursor IDE já está instalado: $(cursor --version 2>/dev/null | head -n1 || echo 'disponível')"
+fi
+
+# 4. Aplicativos adicionais mapeados da máquina (Browsers, Insync, Ayugram)
 if [ -n "$AUR_HELPER" ]; then
     log_info "Instalando navegadores e ferramentas mapeadas via $AUR_HELPER..."
     $AUR_HELPER -S --needed --noconfirm \

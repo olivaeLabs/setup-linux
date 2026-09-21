@@ -2,6 +2,7 @@ antigravity
 antigravity-cli
 antigravity-ide
 ayugram-desktop-bin
+cursor-bin
 github-copilot-app-bin
 github-copilot-cli-bin
 google-chrome

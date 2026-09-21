@@ -18,9 +18,11 @@ Em vez de instalar dezenas de aplicativos pesados em Electron (como Spotify, Wha
 ### 🛠️ Pilares do Setup
 1. **Terminais Modernos & Shells**: **Zsh + Zinit (Turbo Mode) + Starship Prompt + Zellij** (Multiplexador em Rust) + OpenCode CLI e Desktop.
 2. **WebApps & PWAs**: WhatsApp, Spotify, Discord, YouTube, Telegram Web, Google Drive, Calendar, Jitsi, etc. (em `configs/webapps/`).
-3. **Ferramentas de Desenvolvimento & CLI**: GitHub CLI (`gh`), FNM / Node.js, Python, Go, Docker, C/C++ toolchain, `fzf`, `eza`, `bat`, `ripgrep`, `zoxide`.
-4. **IDEs & Editores**: Cursor IDE (Remote WSL Server), Visual Studio Code Oficial, JetBrains Toolbox.
-5. **Dotfiles & Sincronização Multiplataforma**: Aliases de terminal (`.bash_aliases`), Zsh moderno (`.zshrc`), prompt **Starship** (`starship.toml`), Perfil do PowerShell 7 (`Microsoft.PowerShell_profile.ps1`), Git (`.gitconfig`, `.gitignore_global`) e preferências do VS Code (`settings.json`).
+3. **Ferramentas de Desenvolvimento & CLI**: GitHub CLI (`gh`), FNM / Node.js, Python, Go, Docker, C/C++ toolchain, `fzf`, `eza`, `bat`, `ripgrep`, `zoxide`, Antigravity (`agy`).
+4. **IDEs & Editores**: Cursor IDE (AUR `cursor-bin` / Remote Server), Visual Studio Code Oficial, JetBrains Toolbox.
+5. **Aplicativos de Produtividade**: Google Chrome, Microsoft Edge, Opera, Ayugram, Insync + Dolphin.
+6. **Hardware & Otimizações**: Driver Híbrido Nvidia GT 740M (`390xx` + Bumblebee com BusID), Swap secundária com prioridade no `fstab`, ativação do `fstrim.timer` e limpeza de serviços de boot.
+7. **Dotfiles & Sincronização Multiplataforma**: Aliases de terminal (`.bash_aliases`), Zsh moderno (`.zshrc`), prompt **Starship** (`starship.toml`), Perfil do PowerShell 7 (`Microsoft.PowerShell_profile.ps1`), Git (`.gitconfig`, `.gitignore_global`) e preferências do VS Code / Cursor (`settings.json`).
 
 ---
 

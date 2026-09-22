@@ -56,6 +56,14 @@ check_cmd "Zoxide" "zoxide" "zoxide --version"
 check_cmd "FZF" "fzf" "fzf --version"
 check_cmd "Starship Prompt" "starship" "starship --version"
 
+echo -e "\n${COLOR_BOLD}${COLOR_CYAN}▶ Higiene de Segurança (workspace):${COLOR_RESET}"
+check_cmd "govulncheck (Go)" "govulncheck" "govulncheck -version 2>&1 | head -n1"
+check_cmd "pip-audit (Python)" "pip-audit" "pip-audit --version"
+check_cmd "npm (audit)" "npm" "npm --version"
+check_cmd "shellcheck (shell)" "shellcheck" "shellcheck --version"
+
+echo -e "\n${COLOR_GRAY}Pendências de CI/SECURITY por projeto: tasks/WORKSPACE-SECURITY-HYGIENE/${COLOR_RESET}"
+
 echo -e "\n${COLOR_BOLD}${COLOR_CYAN}▶ Sistema e Hardware:${COLOR_RESET}"
 check_cmd "AUR Helper (yay)" "yay" "yay --version"
 check_cmd "Bumblebee / Optirun" "optirun" "optirun --version || echo 'Bumblebee daemon'"

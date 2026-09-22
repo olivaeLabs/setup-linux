@@ -45,4 +45,14 @@ sudo systemctl disable NetworkManager-wait-online.service 2>/dev/null || true
 sudo systemctl disable ModemManager.service 2>/dev/null || true
 log_success "Serviços de boot otimizados!"
 
+# 5. Ferramentas de higiene de segurança (best-effort, nível de usuário)
+if command -v go >/dev/null 2>&1 && ! command -v govulncheck >/dev/null 2>&1; then
+    log_info "Instalando govulncheck (go install)..."
+    go install golang.org/x/vuln/cmd/govulncheck@latest || log_warn "govulncheck: instalação falhou (verifique rede/GOPATH)"
+fi
+if command -v pipx >/dev/null 2>&1 && ! command -v pip-audit >/dev/null 2>&1; then
+    log_info "Instalando pip-audit (pipx)..."
+    pipx install pip-audit >/dev/null 2>&1 || log_warn "pip-audit: instalação falhou"
+fi
+
 log_success "Etapa 00 concluída com sucesso!"

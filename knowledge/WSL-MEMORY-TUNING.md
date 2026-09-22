@@ -103,3 +103,14 @@ sysctl vm.swappiness vm.page-cluster   # 150 / 0
 sudo systemctl disable --now zram-swap.service && sudo rm /etc/systemd/system/zram-swap.service
 # para remover o swap extra: apagar/editar o .wslconfig do perfil e rodar 'wsl --shutdown'
 ```
+
+## 8. Starship: evitar "Scanning current directory timed out"
+
+Ao entrar por `/mnt/c/...` (ex.: iniciar o WSL a partir de `C:\Users\<perfil>`), o
+Starship varria o diretório e emitia avisos. A config versionada em
+`configs/starship/starship.toml` (symlink para `~/.config/starship.toml` via
+`05-dotfiles-sync.sh`) define `scan_timeout = 1000` e `command_timeout = 1000`,
+eliminando o aviso sem travar o prompt.
+
+- Aplicar: `./setup.sh --dotfiles` (ou `ln -sfn "$PWD/configs/starship/starship.toml" ~/.config/starship.toml`).
+- Alternativa/complemento: iniciar o WSL no home com `wsl ~`.

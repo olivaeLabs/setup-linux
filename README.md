@@ -20,7 +20,7 @@ Em vez de instalar dezenas de aplicativos pesados em Electron (como Spotify, Wha
 2. **WebApps & PWAs**: WhatsApp, Spotify, Discord, YouTube, Telegram Web, Google Drive, Calendar, Jitsi, etc. (em `configs/webapps/`).
 3. **Ferramentas de Desenvolvimento & CLI**: GitHub CLI (`gh`), FNM / Node.js, Python, Go, Docker, C/C++ toolchain, `fzf`, `eza`, `bat`, `ripgrep`, `zoxide`.
 4. **IDEs & Editores**: Cursor IDE (Remote WSL Server), Visual Studio Code Oficial, JetBrains Toolbox.
-5. **Dotfiles & Sincronização Multiplataforma**: Aliases de terminal (`.bash_aliases`), Zsh moderno (`.zshrc`), Perfil do PowerShell 7 (`Microsoft.PowerShell_profile.ps1`), Git (`.gitconfig`, `.gitignore_global`) e preferências do VS Code (`settings.json`).
+5. **Dotfiles & Sincronização Multiplataforma**: Aliases de terminal (`.bash_aliases`), Zsh moderno (`.zshrc`), prompt **Starship** (`starship.toml`), Perfil do PowerShell 7 (`Microsoft.PowerShell_profile.ps1`), Git (`.gitconfig`, `.gitignore_global`) e preferências do VS Code (`settings.json`).
 
 ---
 
@@ -62,6 +62,7 @@ setup-linux/
 │   ├── bash/.bash_aliases         # Aliases modernos (ls->eza, cat->bat, gpu->optirun)
 │   ├── git/.gitconfig             # Configuração padrão de Git e aliases
 │   ├── git/.gitignore_global      # Regras globais de ignore
+│   ├── starship/starship.toml     # 🚀 Prompt Starship (scan_timeout p/ evitar avisos em /mnt/c)
 │   ├── vscode/settings.json       # Configurações de editor (fontes, formatação)
 │   └── system/                    # Exemplos de configurações de sistema (fstab, xorg)
 │

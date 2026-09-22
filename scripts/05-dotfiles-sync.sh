@@ -76,4 +76,7 @@ link_file "$CONFIGS_DIR/git/.gitignore_global" "$HOME/.gitignore_global"
 # 4. Configurações do VS Code
 link_file "$CONFIGS_DIR/vscode/settings.json" "$HOME/.config/Code/User/settings.json"
 
+# 5. Configuração do Starship (prompt responsivo e sem avisos em /mnt/c)
+link_file "$CONFIGS_DIR/starship/starship.toml" "$HOME/.config/starship.toml"
+
 log_success "Etapa 05 concluída com sucesso!"

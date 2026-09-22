@@ -1,0 +1,14 @@
+# Configuração do Starship — Setup Imortal
+# Destino canônico: ~/.config/starship.toml (symlink para este arquivo, criado pelo 05-dotfiles-sync.sh)
+#
+# Objetivo: manter o prompt responsivo e silencioso, inclusive ao entrar em
+# diretórios montados do Windows (/mnt/c/...), que podem ter milhares de arquivos.
+
+# Tempo máximo (em MILISSEGUNDOS) gasto procurando contexto de projeto no diretório
+# atual. O padrão (30ms) é baixo e gera "Scanning current directory timed out" em
+# mounts grandes. 1000ms evita o aviso na maioria dos casos sem travar o prompt.
+# Para diretórios Windows gigantes (ex.: C:\Users\<perfil>), prefira entrar com `wsl ~`.
+scan_timeout = 1000
+
+# Tempo máximo (ms) para comandos externos usados pelo prompt.
+command_timeout = 1000

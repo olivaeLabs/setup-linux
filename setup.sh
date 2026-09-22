@@ -18,6 +18,7 @@ run_all() {
     "$SCRIPT_DIR/scripts/05-dotfiles-sync.sh"
     "$SCRIPT_DIR/scripts/06-webapps.sh"
     "$SCRIPT_DIR/scripts/07-opencode.sh"
+    "$SCRIPT_DIR/scripts/08-wsl-memory.sh"
     "$SCRIPT_DIR/scripts/99-snapshot.sh"
     "$SCRIPT_DIR/tests/check-environment.sh"
     log_success "🎉 Configuração completa do Setup Imortal finalizada com sucesso!"
@@ -45,10 +46,11 @@ show_menu() {
     echo -e "  ${COLOR_CYAN}[7]${COLOR_RESET} Sincronizar Dotfiles / Symlinks (05-dotfiles-sync.sh)"
     echo -e "  ${COLOR_CYAN}[8]${COLOR_RESET} Instalar e Restaurar WebApps / PWAs (06-webapps.sh)"
     echo -e "  ${COLOR_CYAN}[9]${COLOR_RESET} Instalar OpenCode CLI e Desktop (07-opencode.sh)"
+    echo -e "  ${COLOR_CYAN}[12]${COLOR_RESET} Tuning de memória do WSL: zram + .wslconfig (08-wsl-memory.sh)"
     echo -e "  ${COLOR_YELLOW}[10]${COLOR_RESET} Snapshot do Sistema Atual (99-snapshot.sh)"
     echo -e "  ${COLOR_MAGENTA}[11]${COLOR_RESET} Diagnóstico do Ambiente (check-environment.sh)"
     echo -e "  ${COLOR_RED}[0]${COLOR_RESET} Sair\n"
-    read -r -p "Digite a opção desejada [0-11]: " choice
+    read -r -p "Digite a opção desejada [0-12]: " choice
     echo ""
 
     case "$choice" in
@@ -63,6 +65,7 @@ show_menu() {
         9) "$SCRIPT_DIR/scripts/07-opencode.sh" ;;
         10) "$SCRIPT_DIR/scripts/99-snapshot.sh" ;;
         11) "$SCRIPT_DIR/tests/check-environment.sh" ;;
+        12) "$SCRIPT_DIR/scripts/08-wsl-memory.sh" ;;
         0) echo -e "${COLOR_GREEN}Até mais!${COLOR_RESET}"; exit 0 ;;
         *) log_error "Opção inválida!"; exit 1 ;;
     esac
@@ -77,6 +80,7 @@ if [ $# -gt 0 ]; then
         --dotfiles|-d) "$SCRIPT_DIR/scripts/05-dotfiles-sync.sh" ;;
         --webapps|-w) "$SCRIPT_DIR/scripts/06-webapps.sh" ;;
         --opencode|-o) "$SCRIPT_DIR/scripts/07-opencode.sh" ;;
+        --wsl-memory) "$SCRIPT_DIR/scripts/08-wsl-memory.sh" ;;
         --help|-h)
             echo "Uso: ./setup.sh [OPÇÃO]"
             echo "Opções:"
@@ -86,6 +90,7 @@ if [ $# -gt 0 ]; then
             echo "  --dotfiles, -d   Sincroniza apenas os dotfiles"
             echo "  --webapps, -w    Restaura e configura os WebApps"
             echo "  --opencode, -o   Instala ou atualiza o OpenCode CLI e Desktop"
+            echo "  --wsl-memory     Aplica zram/sysctl e (se possível) o .wslconfig do perfil atual"
             echo "  --help, -h       Exibe esta ajuda"
             exit 0
             ;;

@@ -99,3 +99,22 @@ Para registrar um novo WebApp, adicione ao array em `configs/webapps/webapps.jso
 }
 ```
 E execute `./setup.sh --webapps` para gerar o `.desktop`.
+
+---
+
+## 🧠 6. Tuning de Memória do WSL (swap, zram e `.wslconfig`)
+
+Sessões com múltiplos agentes/benchmarks podem **derrubar o WSL por OOM** (Chrome + OpenCode
+já consomem boa parte da RAM padrão). O setup cobre isso de forma idempotente:
+
+- **Script**: `scripts/08-wsl-memory.sh` (também acessível via `./setup.sh --wsl-memory`).
+  - `--show` inspeciona memória, swaps, zram, sysctl e `.wslconfig`.
+  - `--windows-config` grava o `.wslconfig` do **perfil Windows atual**.
+  - `--profile <nome>` tenta gravar para outro perfil (ex.: `marco`); se o perfil não for
+    gravável a partir do WSL, imprime o comando PowerShell equivalente.
+- **Valores padrão**: `memory=10GB`, `swap=20GB`, `zram=3G` (prioridade 100),
+  `vm.swappiness=150`, `vm.page-cluster=0`.
+- **Ponto de atenção**: o WSL lê `.wslconfig` do `%USERPROFILE%` de **quem inicia o WSL**;
+  cada perfil Windows (`marco`, `lamar`) tem o seu, e a mudança exige `wsl --shutdown`.
+- **Guia completo**: `setup-linux/knowledge/WSL-MEMORY-TUNING.md`.
+- **Disciplina de validação**: 1 agente por vez + `GOMEMLIMIT` (ex.: `make test-safe`).

@@ -48,7 +48,12 @@ setup-linux/
 │   ├── 05-dotfiles-sync.sh        # Criação de symlinks e bootstrap do Zinit / .zshrc
 │   ├── 06-webapps.sh              # 🌐 Restauração de WebApps priorizados sobre Electron
 │   ├── 07-opencode.sh             # OpenCode CLI e Desktop (AUR ou fallback sem root)
+│   ├── 08-wsl-memory.sh           # 🧠 Tuning de memória do WSL (zram + .wslconfig por perfil)
 │   └── 99-snapshot.sh             # Exportador do estado atual da máquina
+│
+├── knowledge/                     # 📚 Decisões técnicas e guias canônicos
+│   ├── TECHNICAL-DECISIONS.md     # Decisões de arquitetura do setup
+│   └── WSL-MEMORY-TUNING.md       # 🧠 Swap/zram/.wslconfig e disciplina de validação (WSL)
 │
 ├── configs/                       # ⚙️ Dotfiles centralizados e versionados
 │   ├── zsh/.zshrc                 # ⚡ Configuração moderna do Zsh com Zinit (Turbo Mode) e Starship
@@ -90,6 +95,13 @@ setup-linux/
 # Sincronizar dotfiles (symlinks para ~/.zshrc, ~/.bash_aliases, ~/.gitconfig, etc.)
 ./setup.sh --dotfiles
 
+# Tuning de memória do WSL (zram + sysctl e, opcionalmente, .wslconfig do perfil atual)
+./setup.sh --wsl-memory
+
 # Atualizar as listas com novos programas instalados
 ./setup.sh --snapshot
 ```
+
+> 🧠 **WSL com pouca memória?** Veja `knowledge/WSL-MEMORY-TUNING.md` — inclui como aplicar o
+> `.wslconfig` (10 GB RAM / 20 GB swap) em **cada perfil Windows** (ex.: `marco`), o zram
+> persistente via systemd e a disciplina de validação (`make test-safe`, 1 agente por vez).

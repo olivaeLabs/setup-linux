@@ -48,6 +48,8 @@ wslconfig_content() {
 memory=${WSL_MEMORY}
 swap=${WSL_SWAP}
 swapfile=C:\\\\wsl-swap.vhdx
+
+[experimental]
 autoMemoryReclaim=gradual
 EOF
 }
@@ -124,7 +126,7 @@ apply_windows_config() {
     target="$dir/.wslconfig"
     if [ -f "$target" ] && [ "$(cat "$target" 2>/dev/null || true)" = "$content" ]; then
         log "sem mudanças: $target"
-    elif printf '%s\n' "$content" > "$target" 2>/dev/null; then
+    elif ( printf '%s\n' "$content" > "$target" ) 2>/dev/null; then
         log "escrito: $target"
     else
         warn "sem permissão para escrever em $target (perfil de outro usuário Windows)"

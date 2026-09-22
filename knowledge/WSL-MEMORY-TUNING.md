@@ -48,8 +48,14 @@ Valores padrão (sobrescrevíveis por variável de ambiente):
 memory=10GB
 swap=20GB
 swapfile=C:\\wsl-swap.vhdx
+
+[experimental]
 autoMemoryReclaim=gradual
 ```
+
+> `autoMemoryReclaim` pertence à seção **[experimental]** (WSL 2.x). Se ficar em
+> `[wsl2]`, o WSL emite `Chave desconhecida "wsl2.autoMemoryReclaim"` — as demais
+> chaves continuam valendo.
 
 > **Importante:** o WSL lê o `.wslconfig` do **`%USERPROFILE%` do usuário que inicia o WSL**.
 > Com dois perfis Windows (`marco`, `lamar`), cada um pode ter o seu arquivo — mas o tuning
@@ -65,6 +71,8 @@ autoMemoryReclaim=gradual
 > memory=10GB
 > swap=20GB
 > swapfile=C:\\wsl-swap.vhdx
+>
+> [experimental]
 > autoMemoryReclaim=gradual
 > "@ | Set-Content -Path "$env:USERPROFILE\.wslconfig" -Encoding ASCII
 > wsl --shutdown

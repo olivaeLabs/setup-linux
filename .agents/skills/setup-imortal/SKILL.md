@@ -51,9 +51,9 @@ Quando o usuário pedir para adicionar ou instalar qualquer coisa, siga esta mat
 | **Utilitário CLI / Terminal** | `packages/user-native-packages.txt` | `scripts/02-cli-tools.sh` | `bat`, `ripgrep`, `fzf`, `eza`, `zoxide`, `gh` |
 | **SDK / Runtime / Compilador** | `packages/user-native-packages.txt` | `scripts/04-dev-runtimes.sh` | `gcc`, `cmake`, `fnm`/`node`, `python`, `docker` |
 | **WebApp / Serviço Web** | `configs/webapps/webapps.json` | `scripts/06-webapps.sh` | `WhatsApp`, `Discord`, `Spotify`, `Notion` |
-| **App Gráfico Nativo / IDE** | `packages/user-aur-packages.txt` | `scripts/03-gui-apps.sh` | `visual-studio-code-bin`, `jetbrains-toolbox`, `insync` |
+| **App Gráfico Nativo / IDE** | `packages/user-aur-packages.txt` | `scripts/03-gui-apps.sh` | `cursor-bin`, `visual-studio-code-bin`, `jetbrains-toolbox`, `insync` |
 | **Driver / Kernel / Hardware** | `packages/hardware-drivers.txt` | `scripts/01-hardware-gpu.sh` | `bumblebee`, `nvidia-390xx`, `linux612-r8168` |
-| **Dotfile / Configuração** | `configs/<categoria>/` | `scripts/05-dotfiles-sync.sh` | `.bash_aliases`, `.gitconfig`, `settings.json` |
+| **Dotfile / Configuração** | `configs/<categoria>/` | `scripts/05-dotfiles-sync.sh` | `.bash_aliases`, `.gitconfig`, `settings.json` (VS Code/Cursor), `starship.toml` |
 
 ---
 

@@ -54,11 +54,16 @@ ensure_sshd() {
         warn "sshd não encontrado. Instale o OpenSSH (ex.: sudo pacman -S openssh) e rode novamente."
         return 0
     fi
+    if [ "$(systemctl is-active sshd 2>/dev/null || true)" = "active" ] && \
+       [ "$(systemctl is-enabled sshd 2>/dev/null || true)" = "enabled" ]; then
+        log "sshd: já ativo e habilitado (porta ${SSH_PORT})"
+        return 0
+    fi
     log "habilitando/iniciando o servidor SSH (sshd)..."
     if use_sudo systemctl enable --now sshd >/dev/null 2>&1; then
         log "sshd: ativo (porta ${SSH_PORT})"
     else
-        warn "não foi possível habilitar o sshd via systemd; verifique manualmente."
+        warn "não foi possível habilitar o sshd via systemd (sem sudo/TTY?). Rode interativamente: sudo systemctl enable --now sshd"
     fi
 }
 

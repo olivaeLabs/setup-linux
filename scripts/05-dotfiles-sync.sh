@@ -65,8 +65,11 @@ fi
 # Definir Zsh como shell padrão do usuário se não for
 if [ "$SHELL" != "/bin/zsh" ] && command -v zsh &>/dev/null; then
     log_info "Configurando Zsh como shell padrão..."
-    sudo usermod -s /bin/zsh "$USER" || chsh -s /bin/zsh || true
-    log_success "Zsh configurado como shell padrão."
+    if sudo usermod -s /bin/zsh "$USER" || chsh -s /bin/zsh; then
+        log_success "Zsh configurado como shell padrão."
+    else
+        log_warn "não foi possível alterar o shell agora (sem TTY/senha). Rode interativamente: chsh -s /bin/zsh"
+    fi
 fi
 
 # 3. Configurações do Git

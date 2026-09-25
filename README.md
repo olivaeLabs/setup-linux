@@ -22,7 +22,7 @@ Em vez de instalar dezenas de aplicativos pesados em Electron (como Spotify, Wha
 4. **IDEs & Editores**: Cursor IDE (AUR `cursor-bin` / Remote Server), Visual Studio Code Oficial, JetBrains Toolbox.
 5. **Aplicativos de Produtividade**: Google Chrome, Microsoft Edge, Opera, Ayugram, Insync + Dolphin.
 6. **Hardware & Otimizações**: Driver Híbrido Nvidia GT 740M (`390xx` + Bumblebee com BusID), Swap secundária com prioridade no `fstab`, ativação do `fstrim.timer` e limpeza de serviços de boot.
-7. **Dotfiles & Sincronização Multiplataforma**: Aliases de terminal (`.bash_aliases`), Zsh moderno (`.zshrc`), prompt **Starship** (`starship.toml`), Perfil do PowerShell 7 (`Microsoft.PowerShell_profile.ps1`), Git (`.gitconfig`, `.gitignore_global`) e preferências do VS Code / Cursor (`settings.json`).
+7. **Dotfiles & Sincronização Multiplataforma**: Aliases de terminal (`.bash_aliases`), Zsh moderno (`.zshrc`), prompt **Starship** (`starship.toml`), Perfil do PowerShell 7 (`Microsoft.PowerShell_profile.ps1`), Git (`.gitconfig`, `.gitignore_global`), preferências do VS Code / Cursor (`settings.json`) e TUI do OpenCode (`cli.json`).
 
 ---
 
@@ -51,11 +51,13 @@ setup-linux/
 │   ├── 06-webapps.sh              # 🌐 Restauração de WebApps priorizados sobre Electron
 │   ├── 07-opencode.sh             # OpenCode CLI e Desktop (AUR ou fallback sem root)
 │   ├── 08-wsl-memory.sh           # 🧠 Tuning de memória do WSL (zram + .wslconfig por perfil)
+│   ├── 09-ssh-access.sh           # 🔐 Acesso remoto SSH (sshd, chave e firewall Hyper-V do WSL)
 │   └── 99-snapshot.sh             # Exportador do estado atual da máquina
 │
 ├── knowledge/                     # 📚 Decisões técnicas e guias canônicos
 │   ├── TECHNICAL-DECISIONS.md     # Decisões de arquitetura do setup
-│   └── WSL-MEMORY-TUNING.md       # 🧠 Swap/zram/.wslconfig e disciplina de validação (WSL)
+│   ├── WSL-MEMORY-TUNING.md       # 🧠 Swap/zram/.wslconfig e disciplina de validação (WSL)
+│   └── SSH-REMOTE-ACCESS.md       # 🔐 Acesso remoto SSH (Linux e WSL mirrored)
 │
 ├── configs/                       # ⚙️ Dotfiles centralizados e versionados
 │   ├── zsh/.zshrc                 # ⚡ Configuração moderna do Zsh com Zinit (Turbo Mode) e Starship
@@ -65,6 +67,7 @@ setup-linux/
 │   ├── git/.gitconfig             # Configuração padrão de Git e aliases
 │   ├── git/.gitignore_global      # Regras globais de ignore
 │   ├── starship/starship.toml     # 🚀 Prompt Starship (scan_timeout p/ evitar avisos em /mnt/c)
+│   ├── opencode/cli.json          # 🖥️ TUI do OpenCode (mouse/scroll) — paridade entre máquinas
 │   ├── vscode/settings.json       # Configurações de editor (fontes, formatação)
 │   └── system/                    # Exemplos de configurações de sistema (fstab, xorg)
 │
@@ -101,6 +104,9 @@ setup-linux/
 # Tuning de memória do WSL (zram + sysctl e, opcionalmente, .wslconfig do perfil atual)
 ./setup.sh --wsl-memory
 
+# Acesso remoto SSH (habilita o sshd e a chave; no WSL, valida/aplica o firewall Hyper-V)
+./setup.sh --ssh
+
 # Atualizar as listas com novos programas instalados
 ./setup.sh --snapshot
 ```
@@ -108,3 +114,6 @@ setup-linux/
 > 🧠 **WSL com pouca memória?** Veja `knowledge/WSL-MEMORY-TUNING.md` — inclui como aplicar o
 > `.wslconfig` (10 GB RAM / 20 GB swap) em **cada perfil Windows** (ex.: `marco`), o zram
 > persistente via systemd e a disciplina de validação (`make test-safe`, 1 agente por vez).
+>
+> 🔐 **Precisa acessar a máquina por SSH?** Veja `knowledge/SSH-REMOTE-ACCESS.md` — inclui o
+> `sshd` no Linux/WSL e a regra de firewall **Hyper-V** obrigatória no WSL `mirrored` para a LAN.

@@ -69,8 +69,25 @@ echo -e "\n${COLOR_BOLD}${COLOR_CYAN}▶ Sistema e Hardware:${COLOR_RESET}"
 check_cmd "AUR Helper (yay)" "yay" "yay --version"
 check_cmd "Bumblebee / Optirun" "optirun" "optirun --version || echo 'Bumblebee daemon'"
 
+echo -e "\n${COLOR_BOLD}${COLOR_CYAN}▶ Acesso Remoto SSH:${COLOR_RESET}"
+if systemctl is-active --quiet sshd 2>/dev/null; then
+    printf "  %-32s : ${COLOR_GREEN}✔ ATIVO${COLOR_RESET} (porta 22)\n" "Servidor sshd"
+else
+    printf "  %-32s : ${COLOR_RED}✘ INATIVO${COLOR_RESET} (setup.sh --ssh)\n" "Servidor sshd"
+fi
+if [ -f "$HOME/.ssh/id_ed25519" ]; then
+    printf "  %-32s : ${COLOR_GREEN}✔ PRESENTE${COLOR_RESET}\n" "Chave ~/.ssh/id_ed25519"
+else
+    printf "  %-32s : ${COLOR_YELLOW}⚠ AUSENTE${COLOR_RESET} (setup.sh --ssh)\n" "Chave ~/.ssh/id_ed25519"
+fi
+if [ -e "$HOME/.config/opencode/tui.json" ] || [ -L "$HOME/.config/opencode/tui.json" ]; then
+    printf "  %-32s : ${COLOR_YELLOW}⚠ LEGADO (V1)${COLOR_RESET}\n" "OpenCode tui.json"
+else
+    printf "  %-32s : ${COLOR_GREEN}✔ OK${COLOR_RESET}\n" "OpenCode tui.json"
+fi
+
 echo -e "\n${COLOR_BOLD}${COLOR_CYAN}▶ Dotfiles e Symlinks:${COLOR_RESET}"
-for link in "$HOME/.bash_aliases" "$HOME/.gitconfig" "$HOME/.gitignore_global" "$HOME/.config/Code/User/settings.json" "$HOME/.config/Cursor/User/settings.json"; do
+for link in "$HOME/.bash_aliases" "$HOME/.gitconfig" "$HOME/.gitignore_global" "$HOME/.config/Code/User/settings.json" "$HOME/.config/Cursor/User/settings.json" "$HOME/.config/opencode/cli.json"; do
     if [ -L "$link" ]; then
         printf "  %-32s : ${COLOR_GREEN}✔ SYMLINK ATIVO${COLOR_RESET} -> %s\n" "$link" "$(readlink -f "$link")"
     elif [ -f "$link" ]; then

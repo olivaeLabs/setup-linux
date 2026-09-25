@@ -118,3 +118,32 @@ já consomem boa parte da RAM padrão). O setup cobre isso de forma idempotente:
   cada perfil Windows (`marco`, `lamar`) tem o seu, e a mudança exige `wsl --shutdown`.
 - **Guia completo**: `setup-linux/knowledge/WSL-MEMORY-TUNING.md`.
 - **Disciplina de validação**: 1 agente por vez + `GOMEMLIMIT` (ex.: `make test-safe`).
+
+---
+
+## 🔐 7. Acesso Remoto SSH & TUI do OpenCode (`cli.json`)
+
+### Servidor SSH (Linux nativo e WSL)
+- **Script**: `scripts/09-ssh-access.sh` (também via `./setup.sh --ssh`).
+  - Sem flags: habilita/inicia o `sshd` (systemd) e reporta o estado.
+  - `--gen-key`: gera `~/.ssh/id_ed25519` (ed25519, sem passphrase) se ausente.
+  - `--wsl-firewall`: no WSL, cria a regra **Hyper-V firewall** para ingresso da LAN (UAC).
+  - `--show`: diagnóstico (sshd, porta, chave, regra WSL).
+- **Ponto crítico (WSL `mirrored`)**: o ingresso da LAN passa pelo **Hyper-V firewall** do WSL
+  (`DefaultInboundAction = Block`); o Windows Firewall tradicional **não basta**. Sem a regra,
+  a LAN toma **timeout**.
+  ```powershell
+  New-NetFirewallHyperVRule -Name 'WSL-SSH-In' -DisplayName 'WSL SSH Inbound (TCP 22)' `
+    -Direction Inbound -VMCreatorId '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' `
+    -Protocol TCP -LocalPorts 22 -RemoteAddresses LocalSubnet -Action Allow
+  ```
+- **Guia completo**: `setup-linux/knowledge/SSH-REMOTE-ACCESS.md`.
+
+### TUI do OpenCode (`~/.config/opencode/cli.json`)
+- Preferências de terminal/TUI (tema, mouse/scroll, keybinds) vivem no **`cli.json`** —
+  **não** no `opencode.jsonc` (servidor/projeto: MCPs, agents, permissions).
+- Padrão do setup: `configs/opencode/cli.json` (`mouse: true` = scroll interno do TUI)
+  linkado como dotfile pelo `05-dotfiles-sync.sh`.
+- O `05-dotfiles-sync.sh` também **aposenta o `tui.json` legado (V1)** com backup.
+- Paridade multi-máquina e receita de probe: `generic-dev/knowledge/opencode-cli.md`.
+

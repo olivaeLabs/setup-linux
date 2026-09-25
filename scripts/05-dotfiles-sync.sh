@@ -80,4 +80,14 @@ link_file "$CONFIGS_DIR/vscode/settings.json" "$HOME/.config/Cursor/User/setting
 # 5. Configuração do Starship (prompt responsivo e sem avisos em /mnt/c)
 link_file "$CONFIGS_DIR/starship/starship.toml" "$HOME/.config/starship.toml"
 
+# 6. OpenCode CLI/TUI (tema, mouse/scroll, keybinds) — ver generic-dev/knowledge/opencode-cli.md
+link_file "$CONFIGS_DIR/opencode/cli.json" "$HOME/.config/opencode/cli.json"
+
+# 7. Aposentadoria do tui.json legado (V1) — a V2 usa cli.json
+LEGACY_TUI="$HOME/.config/opencode/tui.json"
+if [ -e "$LEGACY_TUI" ] || [ -L "$LEGACY_TUI" ]; then
+    log_warn "Arquivo legado (V1) do OpenCode detectado: $LEGACY_TUI — aposentando com backup"
+    mv "$LEGACY_TUI" "${LEGACY_TUI}.bak.${TIMESTAMP}"
+fi
+
 log_success "Etapa 05 concluída com sucesso!"

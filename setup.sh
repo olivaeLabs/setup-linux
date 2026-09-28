@@ -20,6 +20,7 @@ run_all() {
     "$SCRIPT_DIR/scripts/07-opencode.sh"
     "$SCRIPT_DIR/scripts/08-wsl-memory.sh"
     "$SCRIPT_DIR/scripts/09-ssh-access.sh"
+    "$SCRIPT_DIR/scripts/10-ai-toolkit.sh"
     "$SCRIPT_DIR/scripts/99-snapshot.sh"
     "$SCRIPT_DIR/tests/check-environment.sh"
     log_success "🎉 Configuração completa do Setup Imortal finalizada com sucesso!"
@@ -49,10 +50,11 @@ show_menu() {
     echo -e "  ${COLOR_CYAN}[9]${COLOR_RESET} Instalar OpenCode CLI e Desktop (07-opencode.sh)"
     echo -e "  ${COLOR_CYAN}[12]${COLOR_RESET} Tuning de memória do WSL: zram + .wslconfig (08-wsl-memory.sh)"
     echo -e "  ${COLOR_CYAN}[13]${COLOR_RESET} Acesso Remoto SSH: sshd + chave (+ firewall WSL) (09-ssh-access.sh)"
+    echo -e "  ${COLOR_CYAN}[14]${COLOR_RESET} Toolkit AI Lair: ai-usagebar, ghpending, tclock (10-ai-toolkit.sh)"
     echo -e "  ${COLOR_YELLOW}[10]${COLOR_RESET} Snapshot do Sistema Atual (99-snapshot.sh)"
     echo -e "  ${COLOR_MAGENTA}[11]${COLOR_RESET} Diagnóstico do Ambiente (check-environment.sh)"
     echo -e "  ${COLOR_RED}[0]${COLOR_RESET} Sair\n"
-    read -r -p "Digite a opção desejada [0-13]: " choice
+    read -r -p "Digite a opção desejada [0-14]: " choice
     echo ""
 
     case "$choice" in
@@ -69,6 +71,7 @@ show_menu() {
         11) "$SCRIPT_DIR/tests/check-environment.sh" ;;
         12) "$SCRIPT_DIR/scripts/08-wsl-memory.sh" ;;
         13) "$SCRIPT_DIR/scripts/09-ssh-access.sh" ;;
+        14) "$SCRIPT_DIR/scripts/10-ai-toolkit.sh" ;;
         0) echo -e "${COLOR_GREEN}Até mais!${COLOR_RESET}"; exit 0 ;;
         *) log_error "Opção inválida!"; exit 1 ;;
     esac
@@ -85,6 +88,7 @@ if [ $# -gt 0 ]; then
         --opencode|-o) "$SCRIPT_DIR/scripts/07-opencode.sh" ;;
         --wsl-memory) "$SCRIPT_DIR/scripts/08-wsl-memory.sh" ;;
         --ssh) "$SCRIPT_DIR/scripts/09-ssh-access.sh" ;;
+        --ai-toolkit) "$SCRIPT_DIR/scripts/10-ai-toolkit.sh" ;;
         --help|-h)
             echo "Uso: ./setup.sh [OPÇÃO]"
             echo "Opções:"
@@ -96,6 +100,7 @@ if [ $# -gt 0 ]; then
             echo "  --opencode, -o   Instala ou atualiza o OpenCode CLI e Desktop"
             echo "  --wsl-memory     Aplica zram/sysctl e (se possível) o .wslconfig do perfil atual"
             echo "  --ssh            Habilita o servidor SSH (sshd) e reporta chaves; no WSL, alerta do firewall Hyper-V"
+            echo "  --ai-toolkit     Instala as ferramentas do Akita's AI Lair (ai-usagebar, ghpending, tclock)"
             echo "  --help, -h       Exibe esta ajuda"
             exit 0
             ;;

@@ -1,0 +1,54 @@
+# tclock — configuração completa (WSL)
+# Doc: https://github.com/akitaonrails/clock-tui
+# Teclas: Shift+T tema · g grupos · d/h popups · z esconde widgets · q sai · t timer
+# Origem deste arquivo: setup-linux/configs/tclock/config.toml (symlink em ~/.config/tclock/config.toml)
+
+[default]
+mode = "clock"
+
+[clock]
+show_date = true
+timezone = "America/Sao_Paulo"
+widget_themes = ["default", "evangelion", "nerv"]
+
+[timer]
+durations = ["25m", "5m"]
+titles = ["Foco", "Pausa"]
+
+[countdown]
+time = "20:00"
+title = "Contagem"
+
+# ---------------------------------------------------------------------------
+# Widgets
+# ---------------------------------------------------------------------------
+
+# Grupo "dev": fila do GitHub (aparece no grupo dev, alternável com `g`)
+[[clock.widgets]]
+title = "GitHub pending"
+command = "ghpending"
+group = "dev"
+refresh_secs = 900
+[[clock.widgets.popup_actions]]
+key = "d"
+label = "detalhes"
+args = ["--limit", "50", "--sort", "stale"]
+
+# Grupo "clima": previsão (alternável com `g`)
+[[clock.widgets]]
+title = "Clima — Conceição do Rio Verde/MG"
+command = ["tclock-weather", "--city", "Conceição do Rio Verde", "--days", "3"]
+group = "clima"
+refresh_secs = 1800
+
+# Sempre visível (faixa inferior, largura total): saúde do sistema.
+# Sem flags de --timer, ele auto-detecta os timers de backup do usuário.
+[[clock.widgets]]
+title = ""
+command = ["tclock-system-health", "--exclude-mount", "/run/media"]
+refresh_secs = 300
+position = "bottom"
+[[clock.widgets.popup_actions]]
+key = "h"
+label = "detalhes"
+args = ["--details"]

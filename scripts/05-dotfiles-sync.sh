@@ -93,4 +93,7 @@ if [ -e "$LEGACY_TUI" ] || [ -L "$LEGACY_TUI" ]; then
     mv "$LEGACY_TUI" "${LEGACY_TUI}.bak.${TIMESTAMP}"
 fi
 
+# 8. tclock (relógio de terminal + widgets) — ver generic-dev/knowledge/ai-toolkit-akita.md
+link_file "$CONFIGS_DIR/tclock/config.toml" "$HOME/.config/tclock/config.toml"
+
 log_success "Etapa 05 concluída com sucesso!"

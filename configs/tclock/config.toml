@@ -1,6 +1,6 @@
 # tclock — configuração completa (WSL)
 # Doc: https://github.com/akitaonrails/clock-tui
-# Teclas: Shift+T tema · g grupos · d/h popups · z esconde widgets · q sai · t timer
+# Teclas: Shift+T tema · z esconde widgets · q sai · t timer · d/h popups
 # Origem deste arquivo: setup-linux/configs/tclock/config.toml (symlink em ~/.config/tclock/config.toml)
 
 [default]
@@ -20,29 +20,33 @@ time = "20:00"
 title = "Contagem"
 
 # ---------------------------------------------------------------------------
-# Widgets
+# Widgets — todos SEM grupo (sempre visíveis). Widget de grupo escondido não
+# carrega; por isso não usamos grupos aqui.
 # ---------------------------------------------------------------------------
 
-# Grupo "dev": fila do GitHub (aparece no grupo dev, alternável com `g`)
+# Fila do GitHub
 [[clock.widgets]]
 title = "GitHub pending"
 command = "ghpending"
-group = "dev"
 refresh_secs = 900
 [[clock.widgets.popup_actions]]
 key = "d"
 label = "detalhes"
 args = ["--limit", "50", "--sort", "stale"]
 
-# Grupo "clima": previsão (alternável com `g`)
+# Clima — Conceição do Rio Verde/MG
 [[clock.widgets]]
 title = "Clima — Conceição do Rio Verde/MG"
 command = ["tclock-weather", "--city", "Conceição do Rio Verde", "--days", "3"]
-group = "clima"
 refresh_secs = 1800
 
-# Sempre visível (faixa inferior, largura total): saúde do sistema.
-# Sem flags de --timer, ele auto-detecta os timers de backup do usuário.
+# Uso de IA (ai-usagebar — provedor primário, saída legível)
+[[clock.widgets]]
+title = "Uso de IA"
+command = ["ai-usagebar", "--pretty"]
+refresh_secs = 600
+
+# Saúde do sistema (faixa inferior, largura total)
 [[clock.widgets]]
 title = ""
 command = ["tclock-system-health", "--exclude-mount", "/run/media"]

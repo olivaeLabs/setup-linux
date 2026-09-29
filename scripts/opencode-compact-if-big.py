@@ -1,32 +1,44 @@
 #!/usr/bin/env python3
 """opencode-compact-if-big — pede compactação quando o contexto passa do teto.
 
-Por quê (medido em 29/09/2026, ver generic-dev/knowledge/opencode.md §12): o pedágio de cada
-requisição cresce com o contexto e a v2 **não tem chave de limite** no config — o `auto` só
-compacta ao encher (1M), ou seja, no pior momento.
+PROBLEMA: o OpenCode v2 **não tem chave de limite de contexto** no config. O `compaction.auto`
+só dispara ao **aproximar do limite do modelo** — ou seja, no pior momento: no meio de uma
+tarefa longa. E a compactação é **lossy e irreversível**.
 
-Medida usada: contexto da ÚLTIMA requisição da sessão = `tokens.input + tokens.cache.read`.
+SOLUÇÃO: um gatilho explícito, no **seu** momento (fim de bloco de trabalho), com **travas**
+para não compactar quando há trabalho em voo.
 
-TRAVAS (o ponto crítico): compactação é **irreversível e lossy**. Este utilitário **recusa** agir
-quando a sessão tem **trabalho em voo** — que é justamente o caso de "aguardando subagentes":
+MEDIDA: contexto da última requisição da sessão = `tokens.input + tokens.cache.read`.
+
+TRAVAS (o ponto crítico): o utilitário **recusa** agir quando a sessão tem trabalho em voo:
   (a) a última mensagem do assistente é `finish='tool-calls'` (turno em andamento);
   (b) existe **subagente (sessão-filha) com atividade recente** (janela `--idle-window`);
   (c) há **prompts na fila** (`session_pending` / `session_inbox`).
-Só `--force` passa por cima — e imprime o motivo em destaque.
+Só `--force` passa por cima — e exige confirmação explícita na TUI.
 
-Uso (CLI):
-  opencode-compact-if-big                          # DRY-RUN: mostra sessões, tamanho e se estão em voo
+USO (CLI):
+  opencode-compact-if-big                          # DRY-RUN: mostra sessões, tamanho e estado
   opencode-compact-if-big --list                   # só o relatório
   opencode-compact-if-big --above 600k --apply     # pede a compactação (se não houver trabalho em voo)
   opencode-compact-if-big --session ses_xxx --apply
   opencode-compact-if-big --session ses_xxx --apply --force
 
-Uso (TUI — curses, sem dependências):
-  opencode-compact-if-big --tui
-  teclas: ↑/↓ mover · r atualizar · a armar/aplicar de verdade · +/- teto · o ordenar
-          c pedir compactação (com confirmação) · C forçar (exige digitar "force") · q sair
+USO EM INSTÂNCIA ISOLADA (ex.: opencode-2, com XDG próprio) — as duas pontas precisam apontar
+para a MESMA instância (banco + binário que fala com a API):
+  OPENCODE_COMPACT_DB=~/.opencode-go2/data/opencode/opencode.db \
+  OPENCODE_COMPACT_BIN=opencode-2 opencode-compact-if-big --above 600k --apply
 
-A API do OpenCode executa no próximo ponto seguro (step boundary) e funde pedidos repetidos.
+USO (TUI — curses, sem dependências):
+  opencode-compact-if-big --tui
+  ↑/↓ mover · r atualizar · a armar/aplicar de verdade · +/- teto · o ordenar · t todas
+  c pedir compactação (com confirmação) · C forçar (exige digitar "force") · q sair
+
+PRIVACIDADE: lê **apenas metadados** do banco local (`session_v2`, `session_message`,
+`session_pending`, `session_inbox`). **Não** lê credenciais (`account`/`credential`) nem
+imprime conteúdo de conversa. Títulos e caminhos podem ser ocultados com `--no-titles`.
+
+COMPATIBILIDADE: o OpenCode atualiza com frequência e o schema do banco pode mudar; este
+utilitário valida o schema e falha com mensagem clara em vez de reportar dados errados.
 """
 from __future__ import annotations
 
@@ -34,12 +46,50 @@ import argparse
 import json
 import os
 import re
+import shutil
 import sqlite3
 import subprocess
 import sys
 import time
 
-DEFAULT_DB = os.path.expanduser("~/.local/share/opencode/opencode.db")
+VERSION = "0.2.0"
+TESTADO_COM = "opencode v2.0.20 (beta)"
+BINARIO = ["opencode"]  # preenchido em main() (--bin / $OPENCODE_COMPACT_BIN); permite instâncias isoladas
+
+
+def resolver_db(explicito: str | None = None) -> str:
+    """--db > $OPENCODE_COMPACT_DB > `opencode debug paths` > padrões por SO."""
+    if explicito:
+        return os.path.expanduser(explicito)
+    env = os.environ.get("OPENCODE_COMPACT_DB")
+    if env:
+        return os.path.expanduser(env)
+    if shutil.which("opencode"):
+        try:
+            p = subprocess.run(["opencode", "debug", "paths"], capture_output=True,
+                               text=True, timeout=20)
+            for linha in (p.stdout or "").splitlines():
+                m = re.match(r"\s*db\s+(\S+)\s*$", linha)
+                if m:
+                    return m.group(1)
+        except Exception:
+            pass
+    if sys.platform == "darwin":
+        return os.path.expanduser("~/Library/Application Support/opencode/opencode.db")
+    if os.name == "nt":
+        base = os.environ.get("LOCALAPPDATA", os.path.expanduser("~/AppData/Local"))
+        return os.path.join(base, "opencode", "opencode.db")
+    return os.path.expanduser("~/.local/share/opencode/opencode.db")
+
+
+def resolver_bin(explicito: str | None = None) -> str:
+    """--bin > $OPENCODE_COMPACT_BIN > `opencode`.
+
+    Necessário para instâncias isoladas (ex.: um wrapper `opencode-2` com XDG próprio,
+    que fala com o serviço daquela instância). O banco correspondente vai em --db /
+    $OPENCODE_COMPACT_DB — as duas pontas precisam apontar para a MESMA instância.
+    """
+    return explicito or os.environ.get("OPENCODE_COMPACT_BIN") or "opencode"
 
 
 def parse_size(s: str) -> int:
@@ -70,21 +120,24 @@ def idade(ms: int) -> str:
     return f"{d//3600}h{(d%3600)//60:02d}"
 
 
-def load_sessions(db: str, idle_window: int) -> list[dict]:
-    """Contexto/tamanho + sinais de trabalho em voo, por sessão."""
+def load_sessions(db: str, idle_window: int, titulos: bool = True) -> list[dict]:
+    """Contexto/tamanho + sinais de trabalho em voo, por sessão (somente metadados)."""
     con = sqlite3.connect("file:" + db + "?mode=ro", uri=True)
+    try:  # validação de schema: falha clara em vez de resultado errado
+        con.execute("select 1 from session_message limit 1").fetchone()
+    except sqlite3.Error as e:
+        raise SystemExit(
+            f"schema inesperado em {db}: {e}\n"
+            "O OpenCode pode ter mudado o schema nesta versão — verifique com:\n"
+            f'  sqlite3 "{db}" ".tables"'
+        ) from None
+
     meta = {}
-    try:
-        for sid, directory, title in con.execute("select id, directory, title from session_v2"):
-            meta[sid] = {"directory": directory or "", "title": title or ""}
-    except sqlite3.Error:
-        pass
+    for sid, directory, title in con.execute("select id, directory, title from session_v2"):
+        meta[sid] = {"directory": directory or "", "title": (title or "") if titulos else ""}
     filhos = {}
-    try:
-        for sid, parent in con.execute("select id, parent_id from session_v2 where parent_id is not null"):
-            filhos.setdefault(parent, []).append(sid)
-    except sqlite3.Error:
-        pass
+    for sid, parent in con.execute("select id, parent_id from session_v2 where parent_id is not null"):
+        filhos.setdefault(parent, []).append(sid)
     pend = {}
     for tb in ("session_pending", "session_inbox"):
         try:
@@ -96,30 +149,30 @@ def load_sessions(db: str, idle_window: int) -> list[dict]:
     last_ctx, last_msg, kids_last = {}, {}, {}
     sql = "select session_id, time_created, type, data from session_message order by time_created"
     for sid, t, typ, data in con.execute(sql):
-        if typ == "assistant":
-            try:
-                d = json.loads(data)
-            except Exception:
-                continue
-            tok = d.get("tokens") or {}
-            model = (d.get("model") or {}).get("id") or d.get("modelID") or ""
-            if tok and "deepseek" in model.lower():
-                ctx = int(tok.get("input") or 0) + int((tok.get("cache") or {}).get("read") or 0)
-                if ctx > 0:
-                    last_ctx[sid] = ctx
-            last_msg[sid] = {"t": t, "finish": d.get("finish")}
         kids_last[sid] = t
+        if typ != "assistant":
+            continue
+        try:
+            d = json.loads(data)
+        except Exception:
+            continue
+        tok = d.get("tokens") or {}
+        model = (d.get("model") or {}).get("id") or d.get("modelID") or ""
+        if tok and "deepseek" in model.lower():
+            ctx = int(tok.get("input") or 0) + int((tok.get("cache") or {}).get("read") or 0)
+            if ctx > 0:
+                last_ctx[sid] = ctx
+        last_msg[sid] = {"t": t, "finish": d.get("finish")}
 
     agora = int(time.time() * 1000)
     out = []
     for sid, ctx in last_ctx.items():
         info = last_msg.get(sid) or {}
         finish = info.get("finish")
-        # subagente ativo = filho com atividade RECENTE EM TERMOS ABSOLUTOS (nos últimos idle_window)
-        # e posterior ao último item do pai. Sem a checagem absoluta, sessões antigas ficavam
-        # marcadas "em voo" para sempre (bug observado no smoke test do TUI).
-        limite_pai = (info.get("t") or 0)
+        # subagente ativo = filho com atividade recente EM TERMOS ABSOLUTOS (idle_window)
+        # e posterior ao último item do pai (evita marcar sessões antigas como "em voo").
         limite_abs = agora - idle_window * 1000
+        limite_pai = info.get("t") or 0
         ativos = [k for k in filhos.get(sid, [])
                   if (kids_last.get(k) or 0) >= limite_abs and (kids_last.get(k) or 0) >= limite_pai]
         em_voo = []
@@ -129,21 +182,21 @@ def load_sessions(db: str, idle_window: int) -> list[dict]:
             em_voo.append(f"{len(ativos)} subagente(s) ativo(s)")
         if pend.get(sid):
             em_voo.append(f"{pend[sid]} prompt(s) na fila")
-        parada = bool(info.get("t")) and (agora - info["t"]) > 24 * 3600 * 1000
         out.append({"session": sid, "ctx": ctx, "t": info.get("t") or 0, "finish": finish,
                     "kids": len(ativos), "pend": pend.get(sid, 0), "em_voo": em_voo,
-                    "parada": parada,
+                    "parada": bool(info.get("t")) and (agora - info["t"]) > 24 * 3600 * 1000,
                     "title": (meta.get(sid) or {}).get("title", ""),
                     "directory": (meta.get(sid) or {}).get("directory", "")})
     return sorted(out, key=lambda x: -x["t"])
 
 
-def request_compaction(session: str, timeout: int = 60) -> tuple[bool, str]:
-    cmd = ["opencode", "api", "POST", f"/api/session/{session}/compact", "-d", "{}"]
+def request_compaction(session: str, timeout: int = 60, binario: str = "opencode") -> tuple[bool, str]:
+    """Pede a compactação via API local (roda no próximo ponto seguro, funde pedidos repetidos)."""
+    cmd = [binario, "api", "POST", f"/api/session/{session}/compact", "-d", "{}"]
     try:
         p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
     except FileNotFoundError:
-        return False, "binário `opencode` não encontrado"
+        return False, f"binário `{binario}` não encontrado"
     except subprocess.TimeoutExpired:
         return False, f"timeout de {timeout}s ao chamar a API"
     out = (p.stdout or "").strip() or (p.stderr or "").strip()
@@ -156,9 +209,6 @@ def request_compaction(session: str, timeout: int = 60) -> tuple[bool, str]:
 def tui(args) -> int:
     import curses
 
-    def corrida(s, armado):
-        return 3 if (s["em_voo"] and not armado) else 1 if s["ctx"] >= teto_ref[0] else 2
-
     teto_ref = [args.above]
     estado = {"sel": 0, "armado": False, "ordem": "ctx", "msg": "", "carregado": 0.0,
               "auto": 20, "todas": False}
@@ -167,49 +217,55 @@ def tui(args) -> int:
     def recarregar():
         sessions.clear()
         try:
-            todas = load_sessions(args.db, args.idle_window)
-        except Exception as e:  # noqa: BLE001
-            estado["msg"] = f"erro ao ler o banco: {e}"
+            todas = load_sessions(args.db, args.idle_window, not args.no_titles)
+        except SystemExit as e:
+            estado["msg"] = str(e).splitlines()[0]
             todas = []
-        # por padrão só sessões recentes (≤24 h); 't' mostra as paradas também
-        sessions.extend(todas if estado["todas"] else [s for s in todas if not s.get("parada")])
         if estado["ordem"] == "ctx":
-            sessions.sort(key=lambda s: -s["ctx"])
+            todas.sort(key=lambda s: -s["ctx"])
         else:
-            sessions.sort(key=lambda s: -s["t"])
+            todas.sort(key=lambda s: -s["t"])
+        sessions.extend(todas if estado["todas"] else [s for s in todas if not s.get("parada")])
         estado["sel"] = max(0, min(estado["sel"], len(sessions) - 1)) if sessions else 0
         estado["carregado"] = time.time()
+
+    def cor(s):
+        if s["em_voo"] and not estado["armado"]:
+            return curses.color_pair(1) if curses.has_colors() else curses.A_DIM
+        if s["ctx"] >= teto_ref[0]:
+            return curses.color_pair(3) if curses.has_colors() else curses.A_BOLD
+        return curses.color_pair(2) if curses.has_colors() else 0
 
     def desenhar(stdscr):
         h, w = stdscr.getmaxyx()
         stdscr.erase()
-        cor_teto = curses.color_pair(3) if curses.has_colors() else curses.A_BOLD
-        titulo = (f" Compactação por teto — OpenCode   teto={human(teto_ref[0])}   "
-                  f"[{'ARMADO' if estado['armado'] else 'SIMULAÇÃO'}]   ordem={estado['ordem']}   "
+        titulo = (f" Compactação por teto — OpenCode v{VERSION}   teto={human(teto_ref[0])}   "
+                  f"[{'ARMADO' if estado['armado'] else 'SIMULAÇÃO'}]   {estado['ordem']}   "
                   f"{'todas' if estado['todas'] else 'recentes(24h)'}")
         try:
             stdscr.addnstr(0, 0, titulo.ljust(w - 1)[:w - 1], w - 1, curses.A_REVERSE)
+            stdscr.addnstr(1, 0, f"{'':>2} {'sessão':<26} {'contexto':>9} {'estado':<28} {'visto':>7}  título"[:w - 1],
+                           w - 1, curses.A_BOLD)
         except curses.error:
             pass
-        cab = f"{'':>2} {'sessão':<26} {'contexto':>9} {'em voo':<28} {'visto':>7}  título"
-        stdscr.addnstr(1, 0, cab[:w - 1], w - 1, curses.A_BOLD)
         visiveis = max(1, h - 5)
         inicio = max(0, min(estado["sel"] - visiveis // 3, max(0, len(sessions) - visiveis)))
         for i, s in enumerate(sessions[inicio:inicio + visiveis], start=inicio):
-            linha = f"{'→' if i == estado['sel'] else ' '} {s['session'][:26]:<26} {human(s['ctx']):>9} " \
-                    f"{(', '.join(s['em_voo']) if s['em_voo'] else ('parada' if s.get('parada') else 'livre'))[:28]:<28} " \
-                    f"{idade(s['t']):>7}  {(s['title'] or '')[:max(0, w - 80)]}"
-            attr = curses.A_REVERSE if i == estado["sel"] else corrida(s, estado["armado"])
-            if i == estado["sel"] and curses.has_colors():
-                attr |= curses.color_pair(0)
+            est = ", ".join(s["em_voo"]) if s["em_voo"] else ("parada" if s.get("parada") else "livre")
+            linha = (f"{'→' if i == estado['sel'] else ' '} {s['session'][:26]:<26} {human(s['ctx']):>9} "
+                     f"{est[:28]:<28} {idade(s['t']):>7}  {(s['title'] or '')[:max(0, w - 80)]}")
+            attr = curses.A_REVERSE if i == estado["sel"] else cor(s)
             try:
                 stdscr.addnstr(2 + (i - inicio), 0, linha[:w - 1], w - 1, attr)
             except curses.error:
                 pass
         if not sessions:
-            stdscr.addnstr(3, 2, "nenhuma sessão com tokens registrados", w - 4)
-        dica = ("↑/↓ mover · r atualizar · a armar/aplicar · +/- teto · o ordenar · "
-                "c compactar · C forçar · t todas · q sair")
+            try:
+                stdscr.addnstr(3, 2, "nenhuma sessão recente (use 't' para mostrar as paradas)", w - 4)
+            except curses.error:
+                pass
+        dica = ("↑/↓ mover · r atualizar · a armar · +/- teto · o ordenar · t todas · "
+                "c compactar · C forçar · q sair")
         try:
             stdscr.addnstr(h - 2, 0, dica[:w - 1], w - 1, curses.A_DIM if hasattr(curses, "A_DIM") else 0)
             stdscr.addnstr(h - 1, 0, (estado["msg"] or " ")[:w - 1], w - 1)
@@ -223,7 +279,7 @@ def tui(args) -> int:
         curses.curs_set(1)
         try:
             stdscr.addnstr(h - 1, 0, " " * (w - 1), w - 1)
-            stdscr.addnstr(h - 1, 0, texto[:w - 1], w - 1, curses.A_BOLD)
+            stdscr.addnstr(h - 1, 0, texto[:w - 2], w - 2, curses.A_BOLD)
             stdscr.move(h - 1, min(len(texto) + 1, w - 2))
             resp = stdscr.getstr().decode(errors="ignore").strip()
         except curses.error:
@@ -231,9 +287,7 @@ def tui(args) -> int:
         finally:
             curses.noecho()
             curses.curs_set(0)
-        if palavra:
-            return resp.lower() == palavra
-        return resp.lower() in ("s", "sim", "y", "yes")
+        return resp.lower() == palavra if palavra else resp.lower() in ("s", "sim", "y", "yes")
 
     def agir(stdscr, forcar: bool):
         if not sessions:
@@ -243,19 +297,19 @@ def tui(args) -> int:
             estado["msg"] = f"RECUSADO: {', '.join(s['em_voo'])} — use C para forçar (lossy!)"
             return
         if not estado["armado"] and not forcar:
-            estado["msg"] = f"SIMULAÇÃO: pediria compactar {s['session'][:20]} ({human(s['ctx'])}). " \
-                            f"Pressione 'a' para armar."
+            estado["msg"] = (f"SIMULAÇÃO: pediria compactar {s['session'][:20]} ({human(s['ctx'])}). "
+                             f"Pressione 'a' para armar.")
             return
         risco = " ATENÇÃO: trabalho em voo!" if s["em_voo"] else ""
-        perg = f"Compactar {s['session'][:20]} ({human(s['ctx'])})?{risco} "
         if forcar and s["em_voo"]:
-            ok = confirmar(stdscr, perg + 'digite "force" para confirmar:', palavra="force")
+            ok = confirmar(stdscr, f'Compactar {s["session"][:20]} ({human(s["ctx"])})?{risco} '
+                                   f'digite "force":', palavra="force")
         else:
-            ok = confirmar(stdscr, perg + "[s/N]")
+            ok = confirmar(stdscr, f'Compactar {s["session"][:20]} ({human(s["ctx"])})?{risco} [s/N]')
         if not ok:
             estado["msg"] = "cancelado"
             return
-        ok, msg = request_compaction(s["session"])
+        ok, msg = request_compaction(s["session"], binario=BINARIO[0])
         estado["msg"] = f"{'pedido aceito' if ok else 'FALHOU'}: {msg[:80]}"
         recarregar()
 
@@ -297,11 +351,11 @@ def tui(args) -> int:
                 teto_ref[0] = min(1_000_000, teto_ref[0] + 100_000)
             elif ch == ord("-"):
                 teto_ref[0] = max(0, teto_ref[0] - 100_000)
-            elif ch == ord("t"):
-                estado["todas"] = not estado["todas"]
-                recarregar()
             elif ch == ord("o"):
                 estado["ordem"] = "recencia" if estado["ordem"] == "ctx" else "ctx"
+                recarregar()
+            elif ch == ord("t"):
+                estado["todas"] = not estado["todas"]
                 recarregar()
             elif ch == ord("c"):
                 agir(stdscr, forcar=False)
@@ -313,8 +367,10 @@ def tui(args) -> int:
 
 # ----------------------------------------------------------------------------- CLI
 
-def main() -> int:
-    ap = argparse.ArgumentParser(description="Pede compactação quando o contexto passar do teto.")
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(
+        prog="opencode-compact-if-big",
+        description="Pede compactação quando o contexto passar do teto (com travas).")
     ap.add_argument("--above", type=parse_size, default=600_000, help="teto de contexto (padrão: 600k)")
     ap.add_argument("--apply", action="store_true", help="age de fato (padrão: dry-run)")
     ap.add_argument("--force", action="store_true", help="age mesmo com trabalho em voo (perigoso)")
@@ -322,11 +378,19 @@ def main() -> int:
     ap.add_argument("--all", action="store_true", help="considera todas as sessões acima do teto")
     ap.add_argument("--list", action="store_true", help="apenas lista as sessões e tamanhos")
     ap.add_argument("--tui", action="store_true", help="interface interativa (curses)")
+    ap.add_argument("--no-titles", action="store_true", help="não exibe títulos de sessão (privacidade)")
     ap.add_argument("--idle-window", type=int, default=600,
                     help="janela (s) para considerar subagente ativo (padrão: 600)")
     ap.add_argument("--limit", type=int, default=10, help="linhas no relatório (padrão: 10)")
-    ap.add_argument("--db", default=DEFAULT_DB)
-    args = ap.parse_args()
+    ap.add_argument("--db", default=None, help="caminho do opencode.db (padrão: autodetectado)")
+    ap.add_argument("--bin", default=None,
+                    help="binário que fala com a API da instância (padrão: opencode; "
+                         "use opencode-2 para instâncias isoladas)")
+    ap.add_argument("-V", "--version", action="version",
+                    version=f"opencode-compact-if-big {VERSION} (testado com {TESTADO_COM})")
+    args = ap.parse_args(argv)
+    args.db = resolver_db(args.db)
+    BINARIO[0] = resolver_bin(args.bin)
 
     if args.tui:
         if not os.path.exists(args.db):
@@ -335,23 +399,25 @@ def main() -> int:
         return tui(args)
 
     print(f'M=compactIfBig, I="iniciando", teto={human(args.above)}, modo='
-          f'{"apply" if args.apply else "dry-run"}, status=init')
+          f'{"apply" if args.apply else "dry-run"}, bin={BINARIO[0]}, status=init')
 
     if not os.path.exists(args.db):
-        print(f'M=compactIfBig, E="banco ausente: {args.db}", status=error', file=sys.stderr)
+        print(f'M=compactIfBig, E="banco ausente: {args.db}" (use --db ou $OPENCODE_COMPACT_DB), '
+              f'status=error', file=sys.stderr)
         return 2
 
-    sessions = load_sessions(args.db, args.idle_window)
+    sessions = load_sessions(args.db, args.idle_window, not args.no_titles)
     if args.session:
         sessions = [s for s in sessions if s["session"] == args.session] or \
                    [{"session": args.session, "ctx": 0, "title": "(desconhecida)", "directory": "",
-                     "t": 0, "finish": None, "kids": 0, "pend": 0, "em_voo": []}]
+                     "t": 0, "finish": None, "kids": 0, "pend": 0, "em_voo": [], "parada": False}]
 
     if args.list or not sessions:
         for s in sessions[:args.limit]:
             quando = time.strftime("%d/%m %H:%M", time.localtime(s["t"] / 1000)) if s["t"] else "-"
-            voo = ("EM VOO: " + "; ".join(s["em_voo"])) if s["em_voo"] else ("livre" if not s.get("parada") else "parada")
-            print(f'  {s["session"][:26]:<28} {human(s["ctx"]):>8}  {quando}  {voo[:60]}  {(s["title"] or "")[:28]}')
+            est = ("EM VOO: " + "; ".join(s["em_voo"])) if s["em_voo"] else \
+                  ("parada" if s.get("parada") else "livre")
+            print(f'  {s["session"][:26]:<28} {human(s["ctx"]):>8}  {quando}  {est[:60]}  {(s["title"] or "")[:28]}')
         if not sessions:
             print("  (nenhuma sessão com tokens registrados)")
         return 0
@@ -377,7 +443,7 @@ def main() -> int:
         if not args.apply:
             print(f'  -> [dry-run] pediria: opencode api POST /api/session/{s["session"]}/compact')
             continue
-        ok, msg = request_compaction(s["session"])
+        ok, msg = request_compaction(s["session"], binario=BINARIO[0])
         print(f'  -> {"pedido aceito" if ok else "FALHOU"}: {msg}')
         if not ok:
             rc = 1

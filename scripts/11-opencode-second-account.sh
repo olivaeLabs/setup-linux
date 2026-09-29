@@ -38,7 +38,9 @@ if [ ! -f "$CFG" ]; then
       "model": "opencode-go/glm-5.3-flash"
     }
   },
-  "compaction": { "auto": true, "keep": { "tokens": 24000 }, "buffer": 16000 },
+  // Chaves válidas do schema v2 (o binário embute preserve_recent_tokens/reserved; keep/buffer
+  // não existem no schema e eram ignoradas — corrigido em 29/09/2026).
+  "compaction": { "auto": true, "preserve_recent_tokens": 24000, "reserved": 16000 },
   "mcp": {
     "ai-memory": { "type": "remote", "url": "http://127.0.0.1:49374/mcp", "enabled": true }
   }

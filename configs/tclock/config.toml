@@ -56,6 +56,16 @@ key = "o"
 label = "oficial (ai-usagebar)"
 command = ["ai-usagebar", "--vendor", "opencode-go", "--pretty"]
 
+# Quotas OpenCode Go — conta 2 (instância isolada ~/.opencode-go2)
+[[clock.widgets]]
+title = "Quotas Go · conta 2"
+command = ["quota-meter-2", "--tclock"]
+refresh_secs = 120
+[[clock.widgets.popup_actions]]
+key = "n"
+label = "detalhes"
+args = ["--details"]
+
 # Saúde do sistema (faixa inferior, largura total)
 [[clock.widgets]]
 title = ""

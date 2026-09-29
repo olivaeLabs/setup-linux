@@ -1,0 +1,9 @@
+[Unit]
+Description=ai-memory maintenance (lint, forget-sweep dry-run, backup, wiki commit)
+Documentation=https://github.com/akitaonrails/ai-memory
+After=ai-memory.service
+Wants=ai-memory.service
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/ai-memory-maintenance

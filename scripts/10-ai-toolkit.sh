@@ -77,6 +77,17 @@ UNIT
         sudo systemctl enable --now wsl-user-sessions-boot.service 2>/dev/null || \
             log_warn "não foi possível habilitar wsl-user-sessions-boot.service"
     fi
+
+    # Rotina de manutenção semanal (lint rule-based + forget-sweep dry-run + backup + commit).
+    CONFIGS_AI="$SCRIPT_DIR/../configs/ai-memory"
+    if [ -f "$CONFIGS_AI/ai-memory-maintenance" ]; then
+        install -Dm0755 "$CONFIGS_AI/ai-memory-maintenance"         "$HOME/.local/bin/ai-memory-maintenance"
+        install -Dm0644 "$CONFIGS_AI/ai-memory-maintenance.service" "$HOME/.config/systemd/user/ai-memory-maintenance.service"
+        install -Dm0644 "$CONFIGS_AI/ai-memory-maintenance.timer"   "$HOME/.config/systemd/user/ai-memory-maintenance.timer"
+        systemctl --user daemon-reload 2>/dev/null || true
+        systemctl --user enable --now ai-memory-maintenance.timer 2>/dev/null || \
+            log_warn "ai-memory-maintenance.timer não habilitado (systemd de usuário indisponível?)"
+    fi
 fi
 
 # Detecta provedores de IA com credencial local (somente arquivos locais, sem rede).

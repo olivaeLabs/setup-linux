@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# ai-memory — rotina de manutenção (lint rule-based + forget-sweep dry-run + backup + commit da wiki)
+# Instalado por setup-linux/scripts/10-ai-toolkit.sh. Roda via ai-memory-maintenance.timer (semanal).
+#
+# WSL: o timer é Persistent=true — se o WSL estiver desligado na hora agendada, a rotina
+# roda no próximo start (desde que o user manager suba; ver wsl-user-sessions-boot.service).
+set -uo pipefail
+
+AM=/usr/sbin/ai-memory
+DATA="${AI_MEMORY_DATA_DIR:-$HOME/.local/share/ai-memory}"
+CONFIG="${AI_MEMORY_CONFIG:-$HOME/.config/ai-memory/config.toml}"
+LOG="$DATA/maintenance.log"
+BACKUPS="$DATA/backups"
+WS="${AI_MEMORY_WS:-olivae}"
+PRJ="${AI_MEMORY_PRJ:-projetos}"
+
+mkdir -p "$DATA" "$BACKUPS"
+exec >>"$LOG" 2>&1
+echo "===================== $(date -Is) ====================="
+
+# Lint rule-based (rápido). O passe de contradição via LLM pode pendurar; fica para uso manual.
+echo "--- lint (rule-based, dry-run) ---"
+timeout 120 "$AM" --data-dir "$DATA" --config "$CONFIG" \
+    lint --no-llm --dry-run --workspace "$WS" --project "$PRJ" 2>&1 | tail -40
+
+echo "--- forget-sweep (dry-run) ---"
+timeout 120 "$AM" --data-dir "$DATA" --config "$CONFIG" \
+    forget-sweep --dry-run --workspace "$WS" --project "$PRJ" 2>&1 | tail -20
+
+echo "--- backup ---"
+timeout 300 "$AM" --data-dir "$DATA" --config "$CONFIG" \
+    backup --to "$BACKUPS/ai-memory-$(date +%F).tar.gz" 2>&1 | tail -3
+
+echo "--- commit da wiki ---"
+timeout 120 "$AM" --data-dir "$DATA" --config "$CONFIG" commit 2>&1 | tail -3
+
+echo "--- status ---"
+timeout 60 "$AM" --data-dir "$DATA" --config "$CONFIG" status 2>&1 | grep -iE "pages:|sessions:|observations:" | head

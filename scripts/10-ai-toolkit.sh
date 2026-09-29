@@ -88,6 +88,14 @@ UNIT
         systemctl --user enable --now ai-memory-maintenance.timer 2>/dev/null || \
             log_warn "ai-memory-maintenance.timer não habilitado (systemd de usuário indisponível?)"
     fi
+
+    # Wiring do OpenCode: plugin de captura V2. O alvo `open-code` gera plugin V1,
+    # que o OpenCode V2 RECUSA — use `opencode2` (shape { id, setup }).
+    if command -v opencode &>/dev/null; then
+        ai-memory install-hooks --agent opencode2 --apply 2>/dev/null || \
+            log_warn "install-hooks --agent opencode2 falhou"
+        log_info "MCP no opencode.jsonc: adicione o snippet de 'ai-memory install-mcp --client open-code'."
+    fi
 fi
 
 # Detecta provedores de IA com credencial local (somente arquivos locais, sem rede).

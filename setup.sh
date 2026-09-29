@@ -52,10 +52,11 @@ show_menu() {
     echo -e "  ${COLOR_CYAN}[13]${COLOR_RESET} Acesso Remoto SSH: sshd + chave (+ firewall WSL) (09-ssh-access.sh)"
     echo -e "  ${COLOR_CYAN}[14]${COLOR_RESET} Toolkit AI Lair: ai-usagebar, ghpending, tclock (10-ai-toolkit.sh)"
     echo -e "  ${COLOR_CYAN}[15]${COLOR_RESET} Perfil OpenCode sob demanda: Hostinger + ClickBank (12-opencode-hosting-profile.sh)"
+    echo -e "  ${COLOR_CYAN}[16]${COLOR_RESET} OpenCode instância 2 — conta Go alternativa (11-opencode-second-account.sh)"
     echo -e "  ${COLOR_YELLOW}[10]${COLOR_RESET} Snapshot do Sistema Atual (99-snapshot.sh)"
     echo -e "  ${COLOR_MAGENTA}[11]${COLOR_RESET} Diagnóstico do Ambiente (check-environment.sh)"
     echo -e "  ${COLOR_RED}[0]${COLOR_RESET} Sair\n"
-    read -r -p "Digite a opção desejada [0-15]: " choice
+    read -r -p "Digite a opção desejada [0-16]: " choice
     echo ""
 
     case "$choice" in
@@ -74,6 +75,7 @@ show_menu() {
         13) "$SCRIPT_DIR/scripts/09-ssh-access.sh" ;;
         14) "$SCRIPT_DIR/scripts/10-ai-toolkit.sh" ;;
         15) "$SCRIPT_DIR/scripts/12-opencode-hosting-profile.sh" ;;
+        16) "$SCRIPT_DIR/scripts/11-opencode-second-account.sh" ;;
         0) echo -e "${COLOR_GREEN}Até mais!${COLOR_RESET}"; exit 0 ;;
         *) log_error "Opção inválida!"; exit 1 ;;
     esac
@@ -92,6 +94,7 @@ if [ $# -gt 0 ]; then
         --ssh) "$SCRIPT_DIR/scripts/09-ssh-access.sh" ;;
         --ai-toolkit) "$SCRIPT_DIR/scripts/10-ai-toolkit.sh" ;;
         --opencode-hosting) "$SCRIPT_DIR/scripts/12-opencode-hosting-profile.sh" ;;
+        --opencode-2) "$SCRIPT_DIR/scripts/11-opencode-second-account.sh" ;;
         --help|-h)
             echo "Uso: ./setup.sh [OPÇÃO]"
             echo "Opções:"
@@ -105,6 +108,7 @@ if [ $# -gt 0 ]; then
             echo "  --ssh            Habilita o servidor SSH (sshd) e reporta chaves; no WSL, alerta do firewall Hyper-V"
             echo "  --ai-toolkit     Instala as ferramentas do Akita's AI Lair (ai-usagebar, ghpending, tclock)"
             echo "  --opencode-hosting  Instala o perfil OpenCode sob demanda (Hostinger + ClickBank)"
+            echo "  --opencode-2     Instala a instância 2 do OpenCode (conta Go alternativa)"
             echo "  --help, -h       Exibe esta ajuda"
             exit 0
             ;;

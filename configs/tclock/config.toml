@@ -66,6 +66,25 @@ key = "n"
 label = "detalhes"
 args = ["--details"]
 
+# Compactação de sessão (opencode-compact-if-big) — teto de contexto + travas
+# Doc/política: generic-dev/knowledge/opencode.md §12
+[[clock.widgets]]
+title = "Compactação OpenCode"
+command = ["opencode-compact-if-big", "--status"]
+refresh_secs = 120
+[[clock.widgets.popup_actions]]
+key = "l"
+label = "lista (dry-run)"
+args = ["--list", "--limit", "6", "--no-titles"]
+[[clock.widgets.popup_actions]]
+key = "t"
+label = "TUI (nova janela)"
+command = ["wt.exe", "wsl.exe", "-e", "bash", "-lc", "opencode-compact-if-big --tui"]
+[[clock.widgets.popup_actions]]
+key = "2"
+label = "conta 2 (status)"
+command = ["opencode-2-compact", "--status"]
+
 # Saúde do sistema (faixa inferior, largura total)
 [[clock.widgets]]
 title = ""

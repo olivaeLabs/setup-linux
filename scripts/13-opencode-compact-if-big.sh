@@ -38,8 +38,22 @@ fi
 echo "Instalado: $DESTINO"
 echo "  origem: $origem"
 "$DESTINO" --version 2>/dev/null | sed 's/^/  versão: /' || true
+
+# Wrapper da instância 2: as duas pontas (banco + binário) da MESMA instância, sem caminho absoluto
+# espalhado por aí. Usado, por exemplo, pelo widget do tclock.
+cat > "$HOME/.local/bin/opencode-2-compact" <<'SH'
+#!/usr/bin/env bash
+# opencode-compact-if-big apontando para a instância 2 (banco + binário da conta 2).
+export OPENCODE_COMPACT_DB="${OPENCODE_COMPACT_DB:-$HOME/.opencode-go2/data/opencode/opencode.db}"
+export OPENCODE_COMPACT_BIN="${OPENCODE_COMPACT_BIN:-opencode-2}"
+exec opencode-compact-if-big "$@"
+SH
+chmod +x "$HOME/.local/bin/opencode-2-compact"
+echo "  instalado: ~/.local/bin/opencode-2-compact (instância 2)"
 echo
 echo "  relatório: opencode-compact-if-big --list"
+echo "  painel:    opencode-compact-if-big --status"
 echo "  TUI:       opencode-compact-if-big --tui"
 echo "  aplicar:   opencode-compact-if-big --above 600k --apply"
+echo "  conta 2:   opencode-2-compact --status | --tui | --above 600k --apply"
 echo "  política:  generic-dev/knowledge/opencode.md §12"

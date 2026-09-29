@@ -52,6 +52,31 @@ if command -v ai-memory &>/dev/null; then
     systemctl --user enable --now ai-memory.service 2>/dev/null || \
         log_warn "ai-memory.service não habilitado (systemd de usuário indisponível?)"
     log_info "Preencha ~/.config/ai-memory/env com o provider de LLM (ver cabeçalho)."
+
+    # Workaround WSL: às vezes systemd-user-sessions/systemd-logind não sobem no
+    # boot, deixando /run/nologin de pé; aí o PAM barra o user manager (user@1000)
+    # e o ai-memory.service (user) nunca inicia. Esta unit oneshot garante ambos.
+    if command -v sudo &>/dev/null && [ -d /etc/systemd/system ]; then
+        sudo tee /etc/systemd/system/wsl-user-sessions-boot.service >/dev/null <<'UNIT'
+[Unit]
+Description=WSL: permit user sessions and start the user manager (ai-memory autostart)
+Documentation=man:systemd-user-sessions.service(8)
+Wants=systemd-user-sessions.service systemd-logind.service
+After=local-fs.target systemd-user-sessions.service systemd-logind.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/systemd/systemd-user-sessions start
+ExecStart=-/usr/bin/systemctl start user@1000.service
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+        sudo systemctl daemon-reload || true
+        sudo systemctl enable --now wsl-user-sessions-boot.service 2>/dev/null || \
+            log_warn "não foi possível habilitar wsl-user-sessions-boot.service"
+    fi
 fi
 
 # Detecta provedores de IA com credencial local (somente arquivos locais, sem rede).

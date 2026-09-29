@@ -27,7 +27,7 @@ title = "Contagem"
 # Fila do GitHub
 [[clock.widgets]]
 title = "GitHub pending"
-command = "ghpending"
+command = ["ghpending", "--limit", "8"]
 refresh_secs = 900
 [[clock.widgets.popup_actions]]
 key = "d"
@@ -40,11 +40,21 @@ title = "Clima — Conceição do Rio Verde/MG"
 command = ["tclock-weather", "--city", "Conceição do Rio Verde", "--days", "3"]
 refresh_secs = 1800
 
-# Uso de IA (ai-usagebar — provedor primário, saída legível)
+# Quotas OpenCode Go (medidor — quota-meter: tabela numérica por modelo + oficiais)
 [[clock.widgets]]
-title = "Uso de IA"
-command = ["ai-usagebar", "--pretty"]
-refresh_secs = 600
+title = "Quotas OpenCode Go"
+command = ["quota-meter", "--tclock"]
+refresh_secs = 120
+[[clock.widgets.popup_actions]]
+key = "m"
+label = "detalhes"
+args = ["--details"]
+
+# Quadro oficial do OpenCode Go (ai-usagebar, sob demanda via popup "o")
+[[clock.widgets.popup_actions]]
+key = "o"
+label = "oficial (ai-usagebar)"
+command = ["ai-usagebar", "--vendor", "opencode-go", "--pretty"]
 
 # Saúde do sistema (faixa inferior, largura total)
 [[clock.widgets]]

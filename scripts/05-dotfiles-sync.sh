@@ -96,5 +96,7 @@ fi
 
 # 8. tclock (relógio de terminal + widgets) — ver generic-dev/knowledge/ai-toolkit-akita.md
 link_file "$CONFIGS_DIR/tclock/config.toml" "$HOME/.config/tclock/config.toml"
+# Widget composto (Clima + Quotas das duas contas): script proprio, precisa estar no PATH
+link_file "$CONFIGS_DIR/tclock/tclock-clima-quotas" "$HOME/.local/bin/tclock-clima-quotas"
 
 log_success "Etapa 05 concluída com sucesso!"

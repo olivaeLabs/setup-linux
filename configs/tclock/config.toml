@@ -30,28 +30,26 @@ title = "Contagem"
 # A lista completa continua acessivel no popup "d" (--limit 50 --sort stale).
 [[clock.widgets]]
 title = "GitHub pending"
-command = ["ghpending", "--limit", "3"]
+command = ["ghpending", "--limit", "5"]
 refresh_secs = 900
 [[clock.widgets.popup_actions]]
 key = "d"
 label = "detalhes"
 args = ["--limit", "50", "--sort", "stale"]
 
-# Clima — Conceição do Rio Verde/MG
+# Clima + Quotas (conta 1 e conta 2) — UM widget COMPOSTO.
+# O clock-tui nao empilha widgets dentro de uma coluna (cada widget da grade e UMA coluna), entao
+# "quotas embaixo do clima" se faz com um comando que imprime os blocos em sequencia.
+# O clima tem cache de 900 s (TCLOCK_CLIMA_CACHE) para nao refazer a consulta a cada refresh.
+# Ver: <ai-memory> gotchas/tclock-layout-da-grade-e-espaco-vazio.md
 [[clock.widgets]]
-title = "Clima — Conceição do Rio Verde/MG"
-command = ["tclock-weather", "--city", "Conceição do Rio Verde", "--days", "3"]
-refresh_secs = 1800
-
-# Quotas OpenCode Go (medidor — quota-meter: tabela numérica por modelo + oficiais)
-[[clock.widgets]]
-title = "Quotas OpenCode Go"
-command = ["quota-meter", "--tclock"]
+title = "Clima + Quotas OpenCode Go"
+command = ["tclock-clima-quotas"]
 refresh_secs = 120
 [[clock.widgets.popup_actions]]
 key = "m"
-label = "detalhes"
-args = ["--details"]
+label = "detalhes conta 1"
+command = ["quota-meter", "--details"]
 
 # Quadro oficial do OpenCode Go (ai-usagebar, sob demanda via popup "o")
 [[clock.widgets.popup_actions]]
@@ -59,15 +57,10 @@ key = "o"
 label = "oficial (ai-usagebar)"
 command = ["ai-usagebar", "--vendor", "opencode-go", "--pretty"]
 
-# Quotas OpenCode Go — conta 2 (instância isolada ~/.opencode-go2)
-[[clock.widgets]]
-title = "Quotas Go · conta 2"
-command = ["quota-meter-2", "--tclock"]
-refresh_secs = 120
 [[clock.widgets.popup_actions]]
 key = "n"
-label = "detalhes"
-args = ["--details"]
+label = "detalhes conta 2"
+command = ["quota-meter-2", "--details"]
 
 # Compactação de sessão (opencode-compact-if-big) — teto de contexto + travas
 # Doc/política: generic-dev/knowledge/opencode.md §12

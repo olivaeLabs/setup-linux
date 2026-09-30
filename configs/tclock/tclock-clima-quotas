@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# tclock-clima-quotas — painel COMPOSTO para o tclock: Clima + Quotas OpenCode Go (conta 1 e conta 2).
+#
+# Por que existe: o clock-tui nao empilha widgets dentro de uma coluna (cada widget `position="auto"`
+# e UMA coluna; empilhamento so existe na faixa `position="bottom"`). Para ter "quotas embaixo do
+# clima", os tres viram UM widget que imprime os blocos em sequencia.
+# Ver: <ai-memory>/gotchas/tclock-layout-da-grade-e-espaco-vazio.md
+#
+# O clima passa por CACHE (padrao 900 s) para nao refazer a consulta a cada refresh do tclock,
+# enquanto as quotas (locais, ~1 s) sao lidas sempre.
+#
+# Variaveis: TCLOCK_CIDADE (padrao "Conceição do Rio Verde"), TCLOCK_DIAS (3),
+#             TCLOCK_CLIMA_CACHE (900 s)
+set -uo pipefail
+
+CIDADE="${TCLOCK_CIDADE:-Conceição do Rio Verde}"
+DIAS="${TCLOCK_DIAS:-3}"
+CACHE_SECS="${TCLOCK_CLIMA_CACHE:-900}"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/tclock-clima-quotas"
+CACHE="$CACHE_DIR/clima.txt"
+mkdir -p "$CACHE_DIR"
+
+# 1) Clima (com cache)
+if [ -s "$CACHE" ]; then
+  idade=$(( $(date +%s) - $(stat -c %Y "$CACHE" 2>/dev/null || echo 0) ))
+else
+  idade=$(( CACHE_SECS + 1 ))
+fi
+
+if [ "$idade" -lt "$CACHE_SECS" ]; then
+  cat "$CACHE"
+elif tclock-weather --city "$CIDADE" --days "$DIAS" > "$CACHE.novo" 2>/dev/null && [ -s "$CACHE.novo" ]; then
+  mv "$CACHE.novo" "$CACHE"
+  cat "$CACHE"
+else
+  rm -f "$CACHE.novo"
+  cat "$CACHE" 2>/dev/null || echo "clima indisponivel"
+fi
+
+echo
+# 2) Quotas — conta 1 (medidor principal)
+if command -v quota-meter >/dev/null 2>&1; then
+  quota-meter --tclock 2>/dev/null || echo "quota-meter: falhou"
+else
+  echo "quota-meter: nao instalado"
+fi
+
+echo
+# 3) Quotas — conta 2 (instancia isolada)
+if command -v quota-meter-2 >/dev/null 2>&1; then
+  quota-meter-2 --tclock 2>/dev/null || echo "conta 2: indisponivel"
+else
+  echo "conta 2: quota-meter-2 nao instalado"
+fi

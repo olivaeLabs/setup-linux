@@ -89,7 +89,7 @@ if [ -d "$UNITS" ]; then
   cp -f "$UNITS/opencode-compact.service" "$UNITS/opencode-compact.timer" "$HOME/.config/systemd/user/"
   systemctl --user daemon-reload
   systemctl --user enable --now opencode-compact.timer >/dev/null 2>&1 || true
-  printf "  timer: %s (a cada 5 min, --above 600k --apply --ocioso 15)\n" "$(systemctl --user is-active opencode-compact.timer 2>/dev/null)"
+  printf "  timer: %s (a cada 5 min, --above 600k --apply --ocioso 2h)\n" "$(systemctl --user is-active opencode-compact.timer 2>/dev/null)"
   echo "  log:   ~/.local/state/opencode-compact/compact.log"
   echo "  teste: systemctl --user start opencode-compact.service   (executa uma varredura agora)"
 fi

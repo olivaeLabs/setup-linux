@@ -30,7 +30,11 @@ title = "Contagem"
 # A lista completa continua acessivel no popup "d" (--limit 50 --sort stale).
 [[clock.widgets]]
 title = "GitHub pending"
-command = ["ghpending", "--limit", "5"]
+command = ["ghpending", "--limit", "3"]
+# position = bottom (pedido do operador, 30/09/2026): a lista do GitHub fica na faixa de largura
+# total, embaixo da grade - as linhas longas dos PRs ganham a largura toda e a grade fica so com
+# o painel composto (Clima + Quotas).
+position = "bottom"
 refresh_secs = 900
 [[clock.widgets.popup_actions]]
 key = "d"

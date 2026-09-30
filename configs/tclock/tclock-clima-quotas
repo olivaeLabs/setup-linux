@@ -38,17 +38,21 @@ else
 fi
 
 echo
-# 2) Quotas — conta 1 (medidor principal)
-if command -v quota-meter >/dev/null 2>&1; then
-  quota-meter --tclock 2>/dev/null || echo "quota-meter: falhou"
+# 2) Quotas — resumo por padrao (as tabelas completas ficam nos popups "m" e "n").
+#    Motivo: a grade do tclock tem altura limitada; com o GitHub na faixa inferior o espaco
+#    da grade nao comporta as duas tabelas completas (o widget era cortado).
+#    Para as tabelas completas inline: TCLOCK_QUOTAS_COMPLETO=1
+if [ "${TCLOCK_QUOTAS_COMPLETO:-0}" = "1" ]; then
+  if command -v quota-meter >/dev/null 2>&1; then quota-meter --tclock 2>/dev/null || echo "quota-meter: falhou"; else echo "quota-meter: nao instalado"; fi
+  echo
+  if command -v quota-meter-2 >/dev/null 2>&1; then quota-meter-2 --tclock 2>/dev/null || echo "conta 2: indisponivel"; else echo "conta 2: quota-meter-2 nao instalado"; fi
 else
-  echo "quota-meter: nao instalado"
-fi
-
-echo
-# 3) Quotas — conta 2 (instancia isolada)
-if command -v quota-meter-2 >/dev/null 2>&1; then
-  quota-meter-2 --tclock 2>/dev/null || echo "conta 2: indisponivel"
-else
-  echo "conta 2: quota-meter-2 nao instalado"
+  for par in "conta 1:quota-meter" "conta 2:quota-meter-2"; do
+    rotulo="${par%%:*}"; cmd="${par##*:}"
+    linha=""
+    if command -v "$cmd" >/dev/null 2>&1; then
+      linha=$("$cmd" --tclock 2>/dev/null | grep -am1 'Oficial')
+    fi
+    [ -n "$linha" ] && echo "$rotulo  $linha" || echo "$rotulo  (indisponivel)"
+  done
 fi

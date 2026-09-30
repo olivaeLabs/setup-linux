@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  // Política de cache (prefix caching) — decisão do operador, 2026-09-25:
+  // - Modelo único para TODAS as sessões: DeepSeek V4.1 Flash (cache-read
+  //   US$0,003/1M off-peak, ~50x mais barato que input). Medição:
+  //   `opencode-cache-report` (lê o opencode.db e mostra a taxa por sessão).
+  // - Regras para manter hit alto: NÃO editar AGENTS.md/prefixos no meio da
+  //   sessão; NÃO ligar/desligar tools durante a sessão; prefira CONTINUAR a
+  //   sessão a abrir uma nova; não trocar de modelo no meio da sessão.
+  "model": "opencode-go/deepseek-v4.1-flash",
+  "small_model": "opencode-go/mimo-v2.6-flash",
+  "agent": {
+    "general": { "model": "opencode-go/mimo-v2.6-flash" },
+    "explore": { "model": "opencode-go/mimo-v2.6-flash" },
+    "scout": { "model": "opencode-go/mimo-v2.6-flash" }
+  },
+  "command": {
+    "review-profundo": {
+      "template": "Faça uma revisão profunda e criteriosa do que foi indicado: $ARGUMENTS. Analise riscos, regressões, segurança e conformidade com as regras do workspace. Reporte os achados com severidade e evidência (arquivo:linha), sem editar nada.",
+      "description": "Revisão profunda com DeepSeek (principal)",
+      "model": "opencode-go/deepseek-v4.1-flash"
+    },
+    "testes-rapidos": {
+      "template": "Detecte a suíte de testes do projeto atual (go test, npm test, pytest ou equivalente) e execute-a. Corrija somente as falhas apontadas, sem refatorações, repetindo até passar. Contexto: $ARGUMENTS",
+      "description": "Loop rápido de testes e correções com MiMo",
+      "model": "opencode-go/mimo-v2.6-flash"
+    },
+    "lint-limpo": {
+      "template": "Execute a checagem estática/lint do projeto atual (golangci-lint, eslint, ruff ou equivalente) e aplique as correções de conformidade. Contexto: $ARGUMENTS",
+      "description": "Lint e conformidade com GLM-5.3-Flash",
+      "model": "opencode-go/glm-5.3-flash"
+    }
+  },
+  // Compactação — chaves VÁLIDAS do schema v2 (descoberto em 29/09/2026: `keep`/`buffer`
+  // NÃO existem no schema e vinham sendo IGNORADAS; o equivalente é
+  // `preserve_recent_tokens` (antes keep.tokens=24000) e `reserved` (antes buffer=16000)).
+  // Demais chaves válidas: `auto`, `prune` (poda de tool outputs) e `tail_turns`.
+  // Contexto do modelo = 1M e a mediana de latência satura em ~11-15 s acima de ~150k, então
+  // NÃO perseguimos sessões pequenas: o custo real é `nº de requisições × pedágio (~20 s)`
+  // e o pedágio cai sobretudo na faixa baixa de prefixo + cauda (p90). Ver
+  // generic-dev/knowledge/opencode.md §8 e tasks/opencode-latency-test/evidence/custo-steps-pedagio.md
+  "compaction": {
+    "auto": true,
+    "preserve_recent_tokens": 24000,
+    "reserved": 16000
+  },
+  // POLÍTICA DE MCP (29/09/2026) — por padrão só o `ai-memory` (remoto, 23 tools, zero spawn).
+  // Motivo medido: a latência de cada requisição é dominada pelo processamento do PREFIXO no
+  // provedor; os 2 Hostinger somavam 102 dos 131 schemas de tool, e o cache não compensa isso.
+  // Para usar Hostinger/ClickBank: `opencode-hosting` (perfil sob demanda, não altera este arquivo).
+  // `google-ads` está desabilitado enquanto durar o lockout (credenciais no cofre vault-20260926).
+  // ClickBank/Hostinger DESABILITADOS em 29/09/2026 (decisão do dono: plano 100% mock;
+  // reabilitar por sessão quando o gate da conta real abrir — ver docs/PEDIDO-AUTORIZACAO-GATE-CONTA-REAL.md).
+  "mcp": {
+    "hostinger-wordpress": {
+      "type": "local",
+      "command": [
+        "/home/marcos/.local/share/fnm/aliases/default/bin/node",
+        "/home/marcos/.local/share/fnm/aliases/default/bin/hostinger-wordpress-mcp"
+      ],
+      "enabled": false,
+      "environment": {
+        "DEBUG": "false"
+      }
+    },
+    "hostinger-hosting": {
+      "type": "local",
+      "command": [
+        "/home/marcos/.local/share/fnm/aliases/default/bin/node",
+        "/home/marcos/.local/share/fnm/aliases/default/bin/hostinger-hosting-mcp"
+      ],
+      "enabled": false,
+      "environment": {
+        "DEBUG": "false"
+      }
+    },
+    // DESABILITADO em 29/09/2026 enquanto durar o lockout de produção (26/09):
+    // as credenciais (env/adc.json) estão no cofre ~/.config/google-ads-mcp/vault-20260926,
+    // então o wrapper run.sh falha sempre ("Connection closed" — 124 falhas até 29/09).
+    // Para religar no gate: restaurar o cofre (ver RESTAURAR.txt) e voltar para true.
+    "google-ads": {
+      "type": "local",
+      "command": [
+        "/home/marcos/.config/google-ads-mcp/run.sh"
+      ],
+      "enabled": false
+    },
+    "clickbank": {
+      "type": "local",
+      "command": [
+        "/home/marcos/.config/clickbank-mcp/run.sh"
+      ],
+      "enabled": false
+    },
+    // Playwright MCP — DESABILITADO por padrão. Roteamento (AGENTS.md):
+    // browser-harness (Go) é o padrão; habilite por sessão só a pedido do operador.
+    // Versão pinada (nunca @latest). Para ativar: enabled: true e reinicie no início de sessão.
+    "playwright": {
+      "type": "local",
+      "command": [
+        "/home/marcos/.local/share/fnm/aliases/default/bin/node",
+        "/home/marcos/.local/share/fnm/aliases/default/lib/node_modules/npm/bin/npx-cli.js",
+        "-y",
+        "@playwright/mcp@0.0.82"
+      ],
+      "enabled": false
+    },
+    // ai-memory — memória de longo prazo (MCP remoto local). Serviço:
+    // systemctl --user status ai-memory.service
+    "ai-memory": {
+      "type": "remote",
+      "url": "http://127.0.0.1:49374/mcp",
+      "enabled": true
+    }
+  },
+  "permission": {
+    "bash": {
+      "*clickbank-mcp*": "ask"
+    },
+    "read": {
+      "*clickbank-mcp*": "ask"
+    },
+    "edit": {
+      "*clickbank-mcp*": "ask"
+    }
+  }
+}

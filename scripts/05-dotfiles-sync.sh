@@ -85,6 +85,7 @@ link_file "$CONFIGS_DIR/starship/starship.toml" "$HOME/.config/starship.toml"
 
 # 6. OpenCode CLI/TUI (tema, mouse/scroll, keybinds) — ver generic-dev/knowledge/opencode-cli.md
 link_file "$CONFIGS_DIR/opencode/cli.json" "$HOME/.config/opencode/cli.json"
+link_file "$CONFIGS_DIR/opencode/opencode.jsonc" "$HOME/.config/opencode/opencode.jsonc"
 
 # 7. Aposentadoria do tui.json legado (V1) — a V2 usa cli.json
 LEGACY_TUI="$HOME/.config/opencode/tui.json"

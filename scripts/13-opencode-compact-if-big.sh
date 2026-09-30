@@ -49,7 +49,35 @@ export OPENCODE_COMPACT_BIN="${OPENCODE_COMPACT_BIN:-opencode-2}"
 exec opencode-compact-if-big "$@"
 SH
 chmod +x "$HOME/.local/bin/opencode-2-compact"
+
+# compact-tui: abre a TUI num terminal disponível (WSL/Windows Terminal ou Linux).
+# Existe para o widget do tclock não depender de um terminal específico.
+cat > "$HOME/.local/bin/compact-tui" <<'SH'
+#!/usr/bin/env bash
+# Abre a TUI do opencode-compact-if-big no terminal disponível.
+set -euo pipefail
+CMD_INNER="${COMPACT_TUI_CMD:-opencode-compact-if-big --tui}"
+
+# WSL com Windows Terminal
+if command -v wt.exe >/dev/null 2>&1; then
+  exec wt.exe wsl.exe -e bash -lc "$CMD_INNER"
+fi
+# Linux (primeiro que existir)
+for t in kitty alacritty wezterm ghostty konsole gnome-terminal xfce4-terminal x-terminal-emulator xterm; do
+  if command -v "$t" >/dev/null 2>&1; then
+    case "$t" in
+      gnome-terminal) exec "$t" -- bash -lc "$CMD_INNER" ;;
+      *)              exec "$t" -e bash -lc "$CMD_INNER" ;;
+    esac
+  fi
+done
+echo "compact-tui: nenhum terminal gráfico encontrado. Rode: $CMD_INNER" >&2
+exit 1
+SH
+chmod +x "$HOME/.local/bin/compact-tui"
+
 echo "  instalado: ~/.local/bin/opencode-2-compact (instância 2)"
+echo "  instalado: ~/.local/bin/compact-tui (abre a TUI no terminal disponível)"
 echo
 echo "  relatório: opencode-compact-if-big --list"
 echo "  painel:    opencode-compact-if-big --status"

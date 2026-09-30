@@ -79,7 +79,7 @@ args = ["--list", "--limit", "6", "--no-titles"]
 [[clock.widgets.popup_actions]]
 key = "t"
 label = "TUI (nova janela)"
-command = ["wt.exe", "wsl.exe", "-e", "bash", "-lc", "opencode-compact-if-big --tui"]
+command = ["compact-tui"]
 [[clock.widgets.popup_actions]]
 key = "2"
 label = "conta 2 (status)"

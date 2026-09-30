@@ -72,6 +72,9 @@ args = ["--details"]
 title = "Compactação OpenCode"
 command = ["opencode-compact-if-big", "--status"]
 refresh_secs = 120
+# position = bottom: a GRADE de widgets comporta 2-6 colunas (README do clock-tui) e ja temos 4
+# widgets nela - sem isto o widget fica fora da tela (bug observado em 30/09/2026).
+position = "bottom"
 [[clock.widgets.popup_actions]]
 key = "l"
 label = "lista (dry-run)"

@@ -3,11 +3,16 @@ Description=Compacta sessões do OpenCode acima do teto (ociosas, sem trabalho e
 Documentation=https://github.com/marcos-toliveira/opencode-compact-if-big
 # Política: generic-dev/knowledge/opencode.md §12
 #
-# Só age em sessão OCIOSA (--ocioso 15) e mantém as travas: turno em andamento, subagente ativo
-# ou prompts na fila impedem a compactação. A doc do projeto explica o porquê (compactar é
-# irreversível e lossy).
+# Só age em sessão SEM ATIVIDADE há >= 2h (--ocioso 2h) e mantém as travas: turno em andamento,
+# subagente ativo ou prompts na fila impedem a compactação.
+#
+# A janela folgada não é detalhe: em 30/09/2026 a primeira versão usava 15 min e media a ociosidade
+# pelo último `assistant` (um turno longo parecia sessão abandonada) - o gatilho acabou compactando
+# a PRÓPRIA conversa em uso. Desde a 0.6.0 a ociosidade é medida por atividade real (usuário ou
+# assistente) e sessões já compactadas sem uso novo ficam de fora, mas a folga de 2h continua sendo
+# a proteção de quem trabalha devagar, lê, ou deixa um turno longo rodando.
 
 [Service]
 Type=oneshot
-ExecStart=%h/.local/bin/opencode-compact-if-big --once --above 600k --apply --ocioso 15 --log %h/.local/state/opencode-compact/compact.log
+ExecStart=%h/.local/bin/opencode-compact-if-big --once --above 600k --apply --ocioso 2h --log %h/.local/state/opencode-compact/compact.log
 Nice=10

@@ -24,22 +24,6 @@ title = "Contagem"
 # carrega; por isso não usamos grupos aqui.
 # ---------------------------------------------------------------------------
 
-# Fila do GitHub
-# --limit 3: a GRADE de widgets tem altura uniforme (= a coluna mais alta). Com --limit 8 este
-# widget tinha 23 linhas contra 5/6/3 dos vizinhos, deixando ~18 linhas vazias embaixo deles.
-# A lista completa continua acessivel no popup "d" (--limit 50 --sort stale).
-[[clock.widgets]]
-title = "GitHub pending"
-command = ["ghpending", "--limit", "3"]
-# position = bottom (pedido do operador, 30/09/2026): a lista do GitHub fica na faixa de largura
-# total, embaixo da grade - as linhas longas dos PRs ganham a largura toda e a grade fica so com
-# o painel composto (Clima + Quotas).
-position = "bottom"
-refresh_secs = 900
-[[clock.widgets.popup_actions]]
-key = "d"
-label = "detalhes"
-args = ["--limit", "50", "--sort", "stale"]
 
 # Clima + Quotas (conta 1 e conta 2) — UM widget COMPOSTO.
 # O clock-tui nao empilha widgets dentro de uma coluna (cada widget da grade e UMA coluna), entao
@@ -70,11 +54,11 @@ command = ["quota-meter-2", "--details"]
 # Doc/política: generic-dev/knowledge/opencode.md §12
 [[clock.widgets]]
 title = "Compactação OpenCode"
-command = ["opencode-compact-if-big", "--status"]
+command = ["opencode-compact-if-big", "--status", "--sessions", "10"]
 refresh_secs = 120
 # position = bottom: a GRADE de widgets comporta 2-6 colunas (README do clock-tui) e ja temos 4
 # widgets nela - sem isto o widget fica fora da tela (bug observado em 30/09/2026).
-position = "bottom"
+#position = "bottom"
 [[clock.widgets.popup_actions]]
 key = "l"
 label = "lista (dry-run)"
@@ -93,8 +77,25 @@ command = ["opencode-2-compact", "--status"]
 title = ""
 command = ["tclock-system-health", "--exclude-mount", "/run/media"]
 refresh_secs = 300
-position = "bottom"
+#position = "bottom"
 [[clock.widgets.popup_actions]]
 key = "h"
 label = "detalhes"
 args = ["--details"]
+
+# Fila do GitHub
+# --limit 3: a GRADE de widgets tem altura uniforme (= a coluna mais alta). Com --limit 8 este
+# widget tinha 23 linhas contra 5/6/3 dos vizinhos, deixando ~18 linhas vazias embaixo deles.
+# A lista completa continua acessivel no popup "d" (--limit 50 --sort stale).
+[[clock.widgets]]
+title = "GitHub pending"
+command = ["ghpending", "--limit", "5"]
+# position = bottom (pedido do operador, 30/09/2026): a lista do GitHub fica na faixa de largura
+# total, embaixo da grade - as linhas longas dos PRs ganham a largura toda e a grade fica so com
+# o painel composto (Clima + Quotas).
+position = "bottom"
+refresh_secs = 900
+[[clock.widgets.popup_actions]]
+key = "d"
+label = "detalhes"
+args = ["--limit", "50", "--sort", "stale"]

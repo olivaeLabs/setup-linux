@@ -1,41 +1,103 @@
-#!/usr/bin/env bash
-# tclock-ai-usage — quota OFICIAL (ai-usagebar) no tclock: **uma linha por conta**.
-#
-# Por que assim: o `ai-usagebar --pretty` desenha um painel de ~21 linhas (com barras), grande
-# demais para um widget. O modo Waybar JSON traz o campo `text` com a linha curta
-# ("4% · 4h 03m" = uso + tempo de reset) — e isso que este wrapper imprime.
-# O painel completo continua acessivel pelos popups de painel (o = conta 1, p = conta 2).
-#
-# Variaveis: TCLOCK_AUB_VENDOR (padrao opencode-go), TCLOCK_AUB_CONFIG2 (config da conta 2)
-set -uo pipefail
+#!/usr/bin/env python3
+"""tclock-ai-usage — quota OFICIAL (ai-usagebar) no tclock, uma linha por harness.
 
-extrai() { # le o JSON do ai-usagebar no stdin e imprime a `text` sem HTML
-  python3 -c '
-import json, re, sys
-try:
-    d = json.load(sys.stdin)
-except Exception:
-    sys.exit(1)
-print(re.sub(r"<[^>]+>", "", d.get("text", "")).strip())
-' 2>/dev/null
-}
+Dois modos:
+  * padrao (--todos): TODOS os vendors configurados (copilot, antigravity, opencode-go, ...)
+    + as contas extras que tiverem config propria (ex.: conta 2 em config2.toml);
+  * --so-opencode: apenas o opencode-go (conta 1 e conta 2).
 
-linha() { # $1 = rotulo; resto = args do ai-usagebar
-  local rotulo="$1"; shift
-  local txt=""
-  if command -v ai-usagebar >/dev/null 2>&1; then
-    txt=$(ai-usagebar --json "$@" 2>/dev/null | extrai)
-  fi
-  if [ -n "$txt" ]; then
-    printf '%s  %s\n' "$rotulo" "$txt"
-  else
-    printf '%s  (indisponivel)\n' "$rotulo"
-  fi
-}
+Fonte: `ai-usagebar usage --json` (roda em ~1,4 s e ja traz tudo). O painel completo
+(`ai-usagebar usage`, ~18 linhas, ou `--pretty`) fica nos popups do tclock.
+"""
+from __future__ import annotations
 
-linha "conta 1" --vendor "${TCLOCK_AUB_VENDOR:-opencode-go}"
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
 
-CFG2="${TCLOCK_AUB_CONFIG2:-$HOME/.config/ai-usagebar/config2.toml}"
-if [ -f "$CFG2" ]; then
-  linha "conta 2" --config "$CFG2" --vendor "${TCLOCK_AUB_VENDOR:-opencode-go}"
-fi
+
+def rodar_json(args: list[str]) -> dict | None:
+    try:
+        p = subprocess.run(["ai-usagebar", *args], capture_output=True, text=True, timeout=45)
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return None
+    if p.returncode != 0 or not p.stdout.strip():
+        return None
+    try:
+        return json.loads(p.stdout)
+    except Exception:
+        return None
+
+
+def encurta(msg: str, limite: int = 42) -> str:
+    msg = re.sub(r"\s+", " ", str(msg or "")).strip()
+    if "expired" in msg.lower() or "expirad" in msg.lower():
+        return "sessao/credencial expirada"
+    if len(msg) > limite:
+        msg = msg[: limite - 1].rstrip() + "…"
+    return msg
+
+
+def linha_vendor(e: dict) -> str:
+    nome = (e.get("name") or e.get("short_name") or e.get("display_name") or "?").strip()
+    if e.get("status") == "error" or e.get("error"):
+        return f"{nome:<13} ! {encurta(e.get('error') or 'erro')}"
+    metrica = (e.get("metrics") or [{}])[0]
+    rotulo = (metrica.get("label") or "").strip()
+    valor = metrica.get("value") or (f"{metrica['percent']}%" if metrica.get("percent") is not None else "")
+    # janela entre parenteses no rotulo ("Rolling (5h)" -> "5h"); rotulo longo e omitido
+    jan = re.search(r"\(([^)]+)\)", rotulo)
+    detalhe = (metrica.get("detail") or "").split(" · ")[0]
+    detalhe = re.sub(r"^Resets in\s*", "reset ", detalhe, flags=re.I)
+    partes = [valor] + ([f"({jan.group(1)})"] if jan else [])
+    linha = f"{nome:<13} " + " ".join(x for x in partes if x)
+    if detalhe:
+        linha += f" · {detalhe}"
+    return linha if len(linha) <= 46 else linha[:45].rstrip() + "…"
+
+
+def linha_texto(args: list[str], rotulo: str) -> str:
+    """Uma linha a partir do campo `text` do modo Waybar (uso + reset)."""
+    d = rodar_json(["--json", *args])
+    if not d:
+        return f"{rotulo:<13} (indisponivel)"
+    txt = re.sub(r"<[^>]+>", "", d.get("text", "")).strip()
+    return f"{rotulo:<13} {txt}" if txt else f"{rotulo:<13} (indisponivel)"
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description="Quota oficial (ai-usagebar) para o tclock.")
+    ap.add_argument("--todos", action="store_true", help="todos os vendors configurados (padrao)")
+    ap.add_argument("--so-opencode", action="store_true", help="apenas opencode-go (contas 1 e 2)")
+    ap.add_argument("--limite", type=int, default=0, help="maximo de linhas (0 = sem limite)")
+    args = ap.parse_args()
+
+    vendor = os.environ.get("TCLOCK_AUB_VENDOR", "opencode-go")
+    cfg2 = os.environ.get("TCLOCK_AUB_CONFIG2", os.path.expanduser("~/.config/ai-usagebar/config2.toml"))
+
+    linhas: list[str] = []
+    if args.so_opencode:
+        linhas.append(linha_texto(["--vendor", vendor], "conta 1"))
+        if os.path.exists(cfg2):
+            linhas.append(linha_texto(["--config", cfg2, "--vendor", vendor], "conta 2"))
+    else:
+        dados = rodar_json(["usage", "--json"])
+        if not dados:
+            print("ai-usagebar: indisponivel")
+            return 1
+        for e in dados.get("entries", []):
+            linhas.append(linha_vendor(e))
+        if os.path.exists(cfg2):
+            linhas.append(linha_texto(["--config", cfg2, "--vendor", vendor], "conta 2"))
+
+    if args.limite > 0:
+        linhas = linhas[: args.limite]
+    print("\n".join(linhas))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

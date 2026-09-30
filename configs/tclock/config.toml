@@ -44,20 +44,6 @@ key = "n"
 label = "detalhes conta 2"
 command = ["quota-meter-2", "--details"]
 
-# Uso OFICIAL (ai-usagebar): uma linha por conta, com uso + tempo de reset.
-# O painel completo (21 linhas) fica nos popups: "o" (conta 1) e "p" (conta 2).
-[[clock.widgets]]
-title = "Uso oficial (ai-usagebar)"
-command = ["tclock-ai-usage"]
-refresh_secs = 300
-[[clock.widgets.popup_actions]]
-key = "o"
-label = "painel oficial conta 1"
-command = ["ai-usagebar", "--vendor", "opencode-go", "--pretty"]
-[[clock.widgets.popup_actions]]
-key = "p"
-label = "painel oficial conta 2"
-command = ["ai-usagebar", "--config", "/home/marcos/.config/ai-usagebar/config2.toml", "--vendor", "opencode-go", "--pretty"]
 
 # Compactação de sessão (opencode-compact-if-big) — teto de contexto + travas
 # Doc/política: generic-dev/knowledge/opencode.md §12
@@ -86,7 +72,7 @@ command = ["opencode-2-compact", "--status"]
 title = ""
 command = ["tclock-system-health", "--exclude-mount", "/run/media"]
 refresh_secs = 300
-#position = "bottom"
+#
 [[clock.widgets.popup_actions]]
 key = "h"
 label = "detalhes"
@@ -108,3 +94,19 @@ refresh_secs = 900
 key = "d"
 label = "detalhes"
 args = ["--limit", "50", "--sort", "stale"]
+
+# Uso OFICIAL (ai-usagebar): uma linha por conta, com uso + tempo de reset.
+# O painel completo (21 linhas) fica nos popups: "o" (conta 1) e "p" (conta 2).
+[[clock.widgets]]
+title = "Uso oficial (ai-usagebar)"
+command = ["tclock-ai-usage"]  # modo completo: todos os vendors + conta 2
+refresh_secs = 300
+position = "bottom"
+[[clock.widgets.popup_actions]]
+key = "o"
+label = "painel oficial (todos os vendors)"
+command = ["ai-usagebar", "usage"]
+[[clock.widgets.popup_actions]]
+key = "p"
+label = "painel oficial conta 2"
+command = ["ai-usagebar", "--config", "/home/marcos/.config/ai-usagebar/config2.toml", "--vendor", "opencode-go", "--pretty"]

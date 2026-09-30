@@ -78,6 +78,21 @@ chmod +x "$HOME/.local/bin/compact-tui"
 
 echo "  instalado: ~/.local/bin/opencode-2-compact (instância 2)"
 echo "  instalado: ~/.local/bin/compact-tui (abre a TUI no terminal disponível)"
+
+# ---------------------------------------------------------------------------
+# Gatilho automático (systemd user): compacta sessões acima do teto que estejam OCIOSAS
+# e sem trabalho em voo. Unidades versionadas em configs/opencode-compact/.
+# ---------------------------------------------------------------------------
+UNITS="$AQUI/../configs/opencode-compact"
+if [ -d "$UNITS" ]; then
+  mkdir -p "$HOME/.config/systemd/user"
+  cp -f "$UNITS/opencode-compact.service" "$UNITS/opencode-compact.timer" "$HOME/.config/systemd/user/"
+  systemctl --user daemon-reload
+  systemctl --user enable --now opencode-compact.timer >/dev/null 2>&1 || true
+  printf "  timer: %s (a cada 5 min, --above 600k --apply --ocioso 15)\n" "$(systemctl --user is-active opencode-compact.timer 2>/dev/null)"
+  echo "  log:   ~/.local/state/opencode-compact/compact.log"
+  echo "  teste: systemctl --user start opencode-compact.service   (executa uma varredura agora)"
+fi
 echo
 echo "  relatório: opencode-compact-if-big --list"
 echo "  painel:    opencode-compact-if-big --status"

@@ -1,0 +1,12 @@
+[Unit]
+Description=Gatilho de compactação do OpenCode (a cada 5 min)
+Documentation=https://github.com/marcos-toliveira/opencode-compact-if-big
+
+[Timer]
+OnCalendar=*:0/5
+AccuracySec=30s
+Persistent=false
+Unit=opencode-compact.service
+
+[Install]
+WantedBy=timers.target

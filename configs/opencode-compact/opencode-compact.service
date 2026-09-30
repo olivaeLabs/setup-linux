@@ -1,0 +1,13 @@
+[Unit]
+Description=Compacta sessões do OpenCode acima do teto (ociosas, sem trabalho em voo)
+Documentation=https://github.com/marcos-toliveira/opencode-compact-if-big
+# Política: generic-dev/knowledge/opencode.md §12
+#
+# Só age em sessão OCIOSA (--ocioso 15) e mantém as travas: turno em andamento, subagente ativo
+# ou prompts na fila impedem a compactação. A doc do projeto explica o porquê (compactar é
+# irreversível e lossy).
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/opencode-compact-if-big --once --above 600k --apply --ocioso 15 --log %h/.local/state/opencode-compact/compact.log
+Nice=10

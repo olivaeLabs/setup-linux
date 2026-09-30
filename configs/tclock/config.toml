@@ -25,9 +25,12 @@ title = "Contagem"
 # ---------------------------------------------------------------------------
 
 # Fila do GitHub
+# --limit 3: a GRADE de widgets tem altura uniforme (= a coluna mais alta). Com --limit 8 este
+# widget tinha 23 linhas contra 5/6/3 dos vizinhos, deixando ~18 linhas vazias embaixo deles.
+# A lista completa continua acessivel no popup "d" (--limit 50 --sort stale).
 [[clock.widgets]]
 title = "GitHub pending"
-command = ["ghpending", "--limit", "8"]
+command = ["ghpending", "--limit", "3"]
 refresh_secs = 900
 [[clock.widgets.popup_actions]]
 key = "d"

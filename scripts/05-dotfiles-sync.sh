@@ -98,5 +98,6 @@ fi
 link_file "$CONFIGS_DIR/tclock/config.toml" "$HOME/.config/tclock/config.toml"
 # Widget composto (Clima + Quotas das duas contas): script proprio, precisa estar no PATH
 link_file "$CONFIGS_DIR/tclock/tclock-clima-quotas" "$HOME/.local/bin/tclock-clima-quotas"
+link_file "$CONFIGS_DIR/tclock/tclock-ai-usage" "$HOME/.local/bin/tclock-ai-usage"
 
 log_success "Etapa 05 concluída com sucesso!"

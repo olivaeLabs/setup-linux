@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# tclock-ai-usage — quota OFICIAL (ai-usagebar) no tclock: **uma linha por conta**.
+#
+# Por que assim: o `ai-usagebar --pretty` desenha um painel de ~21 linhas (com barras), grande
+# demais para um widget. O modo Waybar JSON traz o campo `text` com a linha curta
+# ("4% · 4h 03m" = uso + tempo de reset) — e isso que este wrapper imprime.
+# O painel completo continua acessivel pelos popups de painel (o = conta 1, p = conta 2).
+#
+# Variaveis: TCLOCK_AUB_VENDOR (padrao opencode-go), TCLOCK_AUB_CONFIG2 (config da conta 2)
+set -uo pipefail
+
+extrai() { # le o JSON do ai-usagebar no stdin e imprime a `text` sem HTML
+  python3 -c '
+import json, re, sys
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    sys.exit(1)
+print(re.sub(r"<[^>]+>", "", d.get("text", "")).strip())
+' 2>/dev/null
+}
+
+linha() { # $1 = rotulo; resto = args do ai-usagebar
+  local rotulo="$1"; shift
+  local txt=""
+  if command -v ai-usagebar >/dev/null 2>&1; then
+    txt=$(ai-usagebar --json "$@" 2>/dev/null | extrai)
+  fi
+  if [ -n "$txt" ]; then
+    printf '%s  %s\n' "$rotulo" "$txt"
+  else
+    printf '%s  (indisponivel)\n' "$rotulo"
+  fi
+}
+
+linha "conta 1" --vendor "${TCLOCK_AUB_VENDOR:-opencode-go}"
+
+CFG2="${TCLOCK_AUB_CONFIG2:-$HOME/.config/ai-usagebar/config2.toml}"
+if [ -f "$CFG2" ]; then
+  linha "conta 2" --config "$CFG2" --vendor "${TCLOCK_AUB_VENDOR:-opencode-go}"
+fi

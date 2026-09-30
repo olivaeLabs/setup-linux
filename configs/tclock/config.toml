@@ -39,16 +39,25 @@ key = "m"
 label = "detalhes conta 1"
 command = ["quota-meter", "--details"]
 
-# Quadro oficial do OpenCode Go (ai-usagebar, sob demanda via popup "o")
-[[clock.widgets.popup_actions]]
-key = "o"
-label = "oficial (ai-usagebar)"
-command = ["ai-usagebar", "--vendor", "opencode-go", "--pretty"]
-
 [[clock.widgets.popup_actions]]
 key = "n"
 label = "detalhes conta 2"
 command = ["quota-meter-2", "--details"]
+
+# Uso OFICIAL (ai-usagebar): uma linha por conta, com uso + tempo de reset.
+# O painel completo (21 linhas) fica nos popups: "o" (conta 1) e "p" (conta 2).
+[[clock.widgets]]
+title = "Uso oficial (ai-usagebar)"
+command = ["tclock-ai-usage"]
+refresh_secs = 300
+[[clock.widgets.popup_actions]]
+key = "o"
+label = "painel oficial conta 1"
+command = ["ai-usagebar", "--vendor", "opencode-go", "--pretty"]
+[[clock.widgets.popup_actions]]
+key = "p"
+label = "painel oficial conta 2"
+command = ["ai-usagebar", "--config", "/home/marcos/.config/ai-usagebar/config2.toml", "--vendor", "opencode-go", "--pretty"]
 
 # Compactação de sessão (opencode-compact-if-big) — teto de contexto + travas
 # Doc/política: generic-dev/knowledge/opencode.md §12

@@ -146,15 +146,9 @@ setopt HIST_REDUCE_BLANKS
 setopt INC_APPEND_HISTORY
 setopt SHARE_HISTORY
 
-# --- 9. update: atualiza tudo (sistema+AUR, toolchains, repos, servicos) ---
-# Sem flag: mostra o plano e pede confirmacao. Flags: -n (so plano), -y (sem perguntar),
-# --node (Node LTS do fnm), --restart (reinicia servicos com binario trocado).
-# Script versionado em setup-linux/scripts/update-all.sh - vale para WSL e notebook.
-update() {
-	local s="$HOME/Projetos/setup-linux/scripts/update-all.sh"
-	if [ ! -x "$s" ]; then
-		printf 'update: nao encontrei %s (rode o scripts/05-dotfiles-sync.sh?)\n' "$s" >&2
-		return 1
-	fi
-	"$s" "$@"
-}
+# --- 9. Ajustes locais da maquina (opcional) ---
+# O .zshrc e COMPARTILHADO entre as maquinas (symlink para este repo). O que for especifico de UMA
+# maquina vive em ~/.zshrc.local: ex. no WSL, o comando `update` (fontes em scripts/update-all.sh).
+# O notebook NAO tem esse arquivo - la o `update` e o da propria distro (BigLinux: `yay -Syu`) e nao
+# deve ser sobrescrito por nos.
+[ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"

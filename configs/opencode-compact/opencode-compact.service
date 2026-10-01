@@ -16,3 +16,39 @@ Documentation=https://github.com/marcos-toliveira/opencode-compact-if-big
 Type=oneshot
 ExecStart=%h/.local/bin/opencode-compact-if-big --once --above 600k --apply --ocioso 2h --log %h/.local/state/opencode-compact/compact.log
 Nice=10
+
+# ---------------------------------------------------------------------------------------------
+# Endurecimento (30/09/2026). O gatilho só precisa de três coisas:
+#   1. LER o banco local do OpenCode  -> $HOME em somente-leitura basta;
+#   2. PEDIR a compactação por HTTP em 127.0.0.1 (porta do serviço) -> loopback liberado;
+#   3. ESCREVER o próprio log e o log do CLI -> os dois únicos caminhos graváveis.
+# Nada além disso é alcançável: /usr, /etc e o resto do sistema ficam somente-leitura, e o
+# `$HOME` inteiro (banco, configs, chaves) fica somente-leitura - nem em tese o processo
+# compacta o que não deveria, apaga arquivo ou sai gravando por aí.
+# ---------------------------------------------------------------------------------------------
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/state/opencode-compact %h/.local/share/opencode/log
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectProc=invisible
+ProcSubset=pid
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+UMask=0077

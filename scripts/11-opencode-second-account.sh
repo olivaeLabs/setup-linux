@@ -15,11 +15,11 @@ if [ ! -f "$CFG" ]; then
   // Instância 2 — conta Go alternativa, isolada em ~/.opencode-go2 (via XDG_*).
   "username": "Go 2",
   "model": "opencode-go/deepseek-v4.1-flash",
-  "small_model": "opencode-go/mimo-v2.6-flash",
+  "small_model": "opencode-go/deepseek-v4.1-flash",
   "agent": {
-    "general": { "model": "opencode-go/mimo-v2.6-flash" },
-    "explore": { "model": "opencode-go/mimo-v2.6-flash" },
-    "scout":   { "model": "opencode-go/mimo-v2.6-flash" }
+    "general": { "model": "opencode-go/deepseek-v4.1-flash" },
+    "explore": { "model": "opencode-go/deepseek-v4.1-flash" },
+    "scout":   { "model": "opencode-go/deepseek-v4.1-flash" }
   },
   "command": {
     "review-profundo": {
@@ -29,13 +29,13 @@ if [ ! -f "$CFG" ]; then
     },
     "testes-rapidos": {
       "template": "Detecte a suíte de testes do projeto atual (go test, npm test, pytest ou equivalente) e execute-a. Corrija somente as falhas apontadas, sem refatorações, repetindo até passar. Contexto: $ARGUMENTS",
-      "description": "Loop rápido de testes e correções com MiMo",
-      "model": "opencode-go/mimo-v2.6-flash"
+      "description": "Loop rápido de testes e correções com DeepSeek",
+      "model": "opencode-go/deepseek-v4.1-flash"
     },
     "lint-limpo": {
       "template": "Execute a checagem estática/lint do projeto atual (golangci-lint, eslint, ruff ou equivalente) e aplique as correções de conformidade. Contexto: $ARGUMENTS",
-      "description": "Lint e conformidade com GLM-5.3-Flash",
-      "model": "opencode-go/glm-5.3-flash"
+      "description": "Lint e conformidade com DeepSeek",
+      "model": "opencode-go/deepseek-v4.1-flash"
     }
   },
   // Chaves válidas do schema v2 (o binário embute preserve_recent_tokens/reserved; keep/buffer

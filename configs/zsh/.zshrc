@@ -90,3 +90,16 @@ setopt HIST_SAVE_NO_DUPS
 setopt HIST_REDUCE_BLANKS
 setopt INC_APPEND_HISTORY
 setopt SHARE_HISTORY
+
+# --- 9. update: atualiza tudo (sistema+AUR, toolchains, repos, servicos) ---
+# Sem flag: mostra o plano e pede confirmacao. Flags: -n (so plano), -y (sem perguntar),
+# --node (Node LTS do fnm), --restart (reinicia servicos com binario trocado).
+# Script versionado em setup-linux/scripts/update-all.sh - vale para WSL e notebook.
+update() {
+	local s="$HOME/Projetos/setup-linux/scripts/update-all.sh"
+	if [ ! -x "$s" ]; then
+		printf 'update: nao encontrei %s (rode o scripts/05-dotfiles-sync.sh?)\n' "$s" >&2
+		return 1
+	fi
+	"$s" "$@"
+}

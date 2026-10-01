@@ -1,4 +1,36 @@
 {
   "$schema": "https://opencode.ai/v2/cli.json",
-  "mouse": true
+  "tabs": {
+    "layout": "vertical",
+    "indicators": "status",
+    "mode": "on",
+    "scope": "cwd"
+  },
+  "diffs": {
+    "view": "auto"
+  },
+  "attention": {
+    "notifications": true,
+    "sound": false
+  },
+  "debug": {
+    "devtools": true
+  },
+  "theme": {
+    "name": "opencode"
+  },
+  "session": {
+    "sidebar": "auto",
+    "grouping": "auto",
+    "tps": true,
+    "new_location": "launch",
+    "scrollbar": false
+  },
+  "terminal": {
+    "title": true,
+    "copy": "select"
+  },
+  "leader": {
+    "timeout": 2000
+  }
 }

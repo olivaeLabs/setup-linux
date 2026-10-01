@@ -81,6 +81,61 @@ alias gemini-jail='ai-jail gemini'
 alias agy-jail='ai-jail agy'
 alias ai-sandbox='ai-jail'
 
+# >>> ai-jail browsers >>>
+# Abre Brave/Chrome/Chromium isolados pelo ai-jail.
+# Uso: jail brave | jail chrome | jail chromium  [args extras do navegador]
+# Perfis persistentes em ~/jail-browsers/<browser>/{data,cache}
+# GPU habilitada (--gpu) e áudio (--audio).
+jail() {
+	local browser="${1:-}"
+	[ "$#" -gt 0 ] && shift
+	local bin dir xauth
+	case "$browser" in
+		brave)    bin="/usr/bin/brave" ;;
+		chrome)   bin="/usr/bin/google-chrome-stable" ;;
+		chromium) bin="/usr/bin/chromium" ;;
+		""|-h|--help|help)
+			printf 'uso: jail {brave|chrome|chromium} [args extras do navegador]\n' >&2
+			return 0 ;;
+		*)
+			printf 'jail: navegador "%s" não suportado (use: brave, chrome, chromium)\n' "$browser" >&2
+			return 2 ;;
+	esac
+	[ -x "$bin" ] || { printf 'jail: não encontrei %s\n' "$bin" >&2; return 1; }
+
+	dir="$HOME/jail-browsers/$browser"
+	xauth="$HOME/jail-browsers/.Xauthority"
+	mkdir -p "$dir"
+
+	# O home real fica privado (tmpfs) dentro do jail, então o cookie X tem
+	# de viver em ~/jail-browsers (montado por cima do tmpfs) e ter nome com
+	# "Xauthority" — o ai-jail rejeita o /tmp/xauth_XXXX criado pelo Plasma.
+	if [ -n "${XAUTHORITY:-}" ] && [ -r "$XAUTHORITY" ] && [ ! "$XAUTHORITY" -ef "$xauth" ]; then
+		install -m 600 "$XAUTHORITY" "$xauth"
+	fi
+	if [ ! -r "$xauth" ]; then
+		printf 'jail: cookie X não encontrado (%s). Verifique a sessão gráfica: xauth list\n' "$xauth" >&2
+		return 1
+	fi
+
+	# O ai-jail monta o diretório ATUAL como "projeto" (gravável). Se rodar
+	# do HOME, o home inteiro vira gravável. Entrando no diretório do perfil,
+	# o HOME real vira um tmpfs privado e só ~/jail-browsers fica exposto.
+	(
+		export XAUTHORITY="$xauth"
+		cd "$dir" || exit 1
+		exec ai-jail --no-browser --gpu --audio --display --x11 --network \
+			--rw-map "$HOME/jail-browsers" \
+			--exec --terminal-passthrough -- "$bin" \
+			--no-sandbox --test-type \
+			--ignore-gpu-blocklist --enable-gpu-rasterization \
+			--enable-features=VaapiVideoDecoder,VaapiVideoEncoder \
+			--user-data-dir="$dir/data" \
+			--disk-cache-dir="$dir/cache" "$@"
+	)
+}
+# <<< ai-jail browsers <<<
+
 # --- 8. Histórico Inteligente ---
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=50000

@@ -32,5 +32,10 @@
   },
   "leader": {
     "timeout": 2000
+  },
+  "mouse": true,
+  "scroll": {
+    "speed": 3,
+    "acceleration": true
   }
 }

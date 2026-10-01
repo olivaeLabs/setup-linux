@@ -43,6 +43,11 @@ ProtectControlGroups=yes
 ProtectClock=yes
 ProtectHostname=yes
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+# NOTA (verificado em 30/09/2026, systemd 261 + cgroup v2): `IPAddressDeny`/`IPAddressAllow` NÃO são
+# aplicados em serviço de USUÁRIO aqui - dentro de um systemd-run --user com IPAddressDeny=any uma
+# conexão TCP para 1.1.1.1:53 **passou**. Por isso a diretiva foi removida: ficar com um filtro que
+# não filtra é pior que não ter (dá falsa garantia). O limite real de rede é por FAMÍLIA
+# (AF_UNIX/AF_INET/AF_INET6) e o código só faz uma chamada, para o servidor em 127.0.0.1.
 RestrictNamespaces=yes
 RestrictRealtime=yes
 RestrictSUIDSGID=yes

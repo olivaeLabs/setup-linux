@@ -56,7 +56,9 @@ fi
 
 # --- 6. Environment & Development PATHs ---
 export GOPATH="$HOME/go"
-export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$HOME/go/bin:$PATH"
+[[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
+
 
 # FNM (Fast Node Manager)
 if command -v fnm >/dev/null 2>&1; then

@@ -32,7 +32,7 @@ check_cmd "GitHub CLI (gh)" "gh" "gh --version"
 check_cmd "VS Code (code)" "code" "code --version"
 check_cmd "JetBrains Toolbox" "jetbrains-toolbox" "jetbrains-toolbox --version || echo 'OK'"
 check_cmd "OpenCode CLI" "opencode" "opencode --version"
-check_cmd "OpenCode Desktop" "opencode-desktop" "opencode-desktop --appimage-version"
+check_cmd "OpenCode Desktop" "opencode-desktop" "pacman -Q opencode-desktop-bin"
 check_cmd "Cursor IDE" "cursor" "cursor --version"
 
 echo -e "\n${COLOR_BOLD}${COLOR_CYAN}▶ Ferramentas de Desenvolvimento:${COLOR_RESET}"

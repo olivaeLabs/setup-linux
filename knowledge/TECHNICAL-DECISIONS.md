@@ -6,14 +6,15 @@
   `opencode-desktop-bin` via AUR quando um helper (`yay` ou `paru`) está
   disponível. Essa é a integração preferencial para Arch/BigLinux, pois
   mantém o CLI e o Desktop atualizáveis pelo gerenciador nativo.
-- Quando a instalação AUR não consegue elevar privilégios, o módulo usa o
-  instalador oficial do CLI no perfil do usuário e o AppImage oficial do
-  Desktop. O AppImage é baixado da release atual, validado pelo SHA-256
-  publicado pela API do GitHub e registrado como aplicativo `.desktop` local.
-- Os fallbacks são deliberadamente instalados em `~/.opencode` e
-  `~/.local`, evitando exigir senha ou alterar pacotes do sistema em sessões
-  sem TTY. O caminho AUR continua sendo escolhido automaticamente em uma
-  execução normal com privilégios disponíveis.
+- O Desktop **não** usa AppImage: o fallback AppImage foi removido do módulo
+  por preferência do usuário ("não gosto de AppImage"). O Desktop só é
+  instalado pelo pacote AUR `opencode-desktop-bin` (reempacota o `.deb`
+  oficial e roda no `electron44` do sistema); sem helper AUR, o módulo aborta
+  com erro explícito em vez de instalar um AppImage solto.
+- O único fallback restante é o do **CLI**: quando a instalação AUR não
+  consegue elevar privilégios, o módulo usa o instalador oficial no perfil do
+  usuário (`~/.opencode`), evitando exigir senha ou alterar pacotes do sistema
+  em sessões sem TTY.
 
 ## Cursor IDE no BigLinux/Arch
 

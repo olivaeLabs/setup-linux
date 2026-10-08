@@ -15,6 +15,17 @@
   consegue elevar privilégios, o módulo usa o instalador oficial no perfil do
   usuário (`~/.opencode`), evitando exigir senha ou alterar pacotes do sistema
   em sessões sem TTY.
+- **Pitfalls medidos (08/10/2026)**: o pacote AUR `opencode-desktop-bin` não
+  tem `electron44` nos repos oficiais (param no `electron43`) e resolve via
+  `electron44-bin` (AUR, `provides=electron44`). Um symlink quebrado em
+  `~/.local/bin/opencode-desktop` **sombreia** o binário real
+  `/usr/bin/opencode-desktop` (o `~/.local/bin` vem antes no PATH). O
+  AppImageLauncher **consome/move** um AppImage quando ele é executado. Na GPU
+  híbrida (Intel HD 4000 + GT 740M/Bumblebee) o app sobe no render
+  Intel/software; avisos `NV-GLX missing` e `Ivy Bridge Vulkan incompleto` são
+  benignos, e os wrappers de render do BigLinux (`SoftwareRender`,
+  `NvidiaRender`, `IntegratedRender`) seguem disponíveis nas ações do
+  `.desktop`.
 
 ## Cursor IDE no BigLinux/Arch
 

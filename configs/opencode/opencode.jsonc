@@ -105,11 +105,15 @@
       ],
       "enabled": false
     },
-    // ai-memory — memória de longo prazo (MCP remoto local). Serviço:
-    // systemctl --user status ai-memory.service
+    // ai-memory — memória de longo prazo (MCP remoto). O token NÃO fica aqui: vem de
+    // {file:...}, lido em runtime do cofre ~/.config/anubis/ai-memory.token (chmod 600,
+    // não versionado). NÃO usar {env:}: o OpenCode Desktop sobe o servidor WSL SEM shell
+    // (ambiente mínimo, sem AI_MEMORY_*), então só {file:} funciona nos dois caminhos.
+    // Serviço: systemctl --user status ai-memory.service
     "ai-memory": {
       "type": "remote",
-      "url": "http://127.0.0.1:49374/mcp",
+      "url": "http://memory.olivae.lan:49374/mcp",
+      "headers": { "Authorization": "Bearer {file:/home/marcos/.config/anubis/ai-memory.token}" },
       "enabled": true
     }
   },

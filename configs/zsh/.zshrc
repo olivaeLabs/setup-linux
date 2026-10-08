@@ -154,3 +154,23 @@ setopt SHARE_HISTORY
 # O notebook NAO tem esse arquivo - la o `update` e o da propria distro (BigLinux: `yay -Syu`) e nao
 # deve ser sobrescrito por nos.
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
+
+# opencode
+export PATH=/home/marcos/.opencode/bin:$PATH
+
+# --- 10. VS Code (Windows) no WSL: launcher 'code' com base WSL ---
+# O bin do VS Code para Windows e um script sh que detecta o WSL (WSL_DISTRO_NAME)
+# e delega ao wslCode.sh da extensao Remote-WSL, abrindo com autoridade
+# wsl+<distro> (a base passa a ser o WSL). O remote-cli em
+# ~/.vscode-server/<commit>/bin/remote-cli NAO serve aqui: ele exige
+# VSCODE_IPC_HOOK_CLI/VSCODE_CLIENT_COMMAND e falha fora do terminal integrado
+# ("Command is only available in WSL or inside a Visual Studio Code terminal.").
+# So ativa no WSL, para nao poluir maquinas Linux nativas.
+VSCODE_WIN_BIN="/mnt/c/Program Files/Microsoft VS Code/bin"
+if [ -n "$WSL_DISTRO_NAME" ] && [ -x "$VSCODE_WIN_BIN/code" ]; then
+  case ":$PATH:" in
+    *":$VSCODE_WIN_BIN:"*) ;;
+    *) PATH="$PATH:$VSCODE_WIN_BIN" ;;
+  esac
+fi
+unset VSCODE_WIN_BIN

@@ -48,49 +48,55 @@
   // Motivo medido: a latência de cada requisição é dominada pelo processamento do PREFIXO no
   // provedor; os 2 Hostinger somavam 102 dos 131 schemas de tool, e o cache não compensa isso.
   // Para usar Hostinger/ClickBank: `opencode-hosting` (perfil sob demanda, não altera este arquivo).
-  // `google-ads` está desabilitado enquanto durar o lockout (credenciais no cofre vault-20260926).
-  // ClickBank/Hostinger DESABILITADOS em 29/09/2026 (decisão do dono: plano 100% mock;
-  // reabilitar por sessão quando o gate da conta real abrir — ver docs/PEDIDO-AUTORIZACAO-GATE-CONTA-REAL.md).
+  // `google-ads` e `clickbank` REABILITADOS em 08/10/2026 por autorização expressa do dono
+  // (diagnóstico read-only de campanhas). Hostinger segue DESABILITADO por padrão (latência).
+  // Gate de conta real: docs/PEDIDO-AUTORIZACAO-GATE-CONTA-REAL.md (anubis-gofu).
   "mcp": {
+    // Fix 08/10/2026: o binário direto NÃO carregava o token (cofre hostinger.env), então o MCP
+    // caía em OAuth/retry e PENDURAVA no `execute` (timeout infinito). Agora carrega o cofre antes.
     "hostinger-wordpress": {
       "type": "local",
       "command": [
-        "/home/marcos/.local/share/fnm/aliases/default/bin/node",
-        "/home/marcos/.local/share/fnm/aliases/default/bin/hostinger-wordpress-mcp"
+        "/usr/bin/bash",
+        "-c",
+        "set -a; . /home/marcos/.config/anubis/hostinger.env; set +a; exec /home/marcos/.local/share/fnm/aliases/default/bin/node /home/marcos/.local/share/fnm/aliases/default/bin/hostinger-wordpress-mcp"
       ],
-      "enabled": false,
+      "enabled": true,
       "environment": {
         "DEBUG": "false"
       }
     },
+    // Fix 08/10/2026: mesmo defeito do hostinger-wordpress — o binário direto não carregava o
+    // token (cofre hostinger.env) e travava em OAuth no `execute`. Carrega o cofre antes do exec.
     "hostinger-hosting": {
       "type": "local",
       "command": [
-        "/home/marcos/.local/share/fnm/aliases/default/bin/node",
-        "/home/marcos/.local/share/fnm/aliases/default/bin/hostinger-hosting-mcp"
+        "/usr/bin/bash",
+        "-c",
+        "set -a; . /home/marcos/.config/anubis/hostinger.env; set +a; exec /home/marcos/.local/share/fnm/aliases/default/bin/node /home/marcos/.local/share/fnm/aliases/default/bin/hostinger-hosting-mcp"
       ],
-      "enabled": false,
+      "enabled": true,
       "environment": {
         "DEBUG": "false"
       }
     },
-    // DESABILITADO em 29/09/2026 enquanto durar o lockout de produção (26/09):
-    // as credenciais (env/adc.json) estão no cofre ~/.config/google-ads-mcp/vault-20260926,
-    // então o wrapper run.sh falha sempre ("Connection closed" — 124 falhas até 29/09).
-    // Para religar no gate: restaurar o cofre (ver RESTAURAR.txt) e voltar para true.
+    // REABILITADO em 08/10/2026 por autorização expressa do dono (diagnóstico read-only de
+    // campanhas). Estava desabilitado desde 29/09/2026 pelo lockout de produção. Credencial
+    // reautenticada em 07/10 (adc.json + backups). Este MCP é read-only.
     "google-ads": {
       "type": "local",
       "command": [
         "/home/marcos/.config/google-ads-mcp/run.sh"
       ],
-      "enabled": false
+      "enabled": true
     },
+    // REABILITADO em 08/10/2026 por autorização expressa do dono (diagnóstico read-only).
     "clickbank": {
       "type": "local",
       "command": [
         "/home/marcos/.config/clickbank-mcp/run.sh"
       ],
-      "enabled": false
+      "enabled": true
     },
     // Playwright MCP — DESABILITADO por padrão. Roteamento (AGENTS.md):
     // browser-harness (Go) é o padrão; habilite por sessão só a pedido do operador.

@@ -11,8 +11,10 @@
     "terminal.integrated.fontFamily": "'JetBrains Mono', 'Fira Code', monospace",
     "terminal.integrated.fontSize": 13,
     "workbench.iconTheme": "material-icon-theme",
-    "workbench.colorTheme": "Default Dark Modern",
+    "workbench.colorTheme": "Dark Modern",
     "git.enableSmartCommit": true,
     "git.confirmSync": false,
-    "git.autofetch": true
+    "git.autofetch": true,
+    "dictation.model": "mai",
+    "agents.voice.language": "pt"
 }

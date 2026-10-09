@@ -42,6 +42,11 @@ log_success "Pacotes instalados: ${AUR_PKGS[*]}"
 # ATENÇÃO (cache-hit): registrar o MCP altera opencode.jsonc e invalida o
 # prefix cache — fazer no INÍCIO de uma sessão nova.
 # ------------------------------------------------------------------------------
+# NOTA (2026-10-09): neste host a instalação real é o TARBALL user-space em
+# ~/.local/bin/ai-memory (não o AUR /usr/sbin). O wrapper de manutenção resolve o
+# binário via `command -v`. Upgrade a partir da 2.5 via `ai-memory upgrade`; de
+# 2.4.x exige bootstrap manual — ver generic-dev/knowledge/ai-toolkit-akita.md
+# §4 "Upgrade do binário".
 if command -v ai-memory &>/dev/null; then
     log_info "Inicializando ai-memory (config canônico + serviço de usuário)..."
     mkdir -p "$HOME/.config/ai-memory" "$HOME/.local/share/ai-memory"

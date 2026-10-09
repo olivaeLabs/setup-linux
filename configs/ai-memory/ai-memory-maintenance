@@ -6,7 +6,14 @@
 # roda no próximo start (desde que o user manager suba; ver wsl-user-sessions-boot.service).
 set -uo pipefail
 
-AM=/usr/sbin/ai-memory
+# Binário: tarball user-space (~/.local/bin) OU pacote AUR (/usr/sbin). Resolve o real.
+AM="$(command -v ai-memory 2>/dev/null || true)"
+if [ -z "$AM" ]; then
+    for c in "$HOME/.local/bin/ai-memory" /usr/sbin/ai-memory /usr/bin/ai-memory; do
+        [ -x "$c" ] && AM="$c" && break
+    done
+fi
+[ -x "${AM:-}" ] || { echo "ai-memory não encontrado no PATH nem em ~/.local/bin//usr/sbin"; exit 127; }
 DATA="${AI_MEMORY_DATA_DIR:-$HOME/.local/share/ai-memory}"
 CONFIG="${AI_MEMORY_CONFIG:-$HOME/.config/ai-memory/config.toml}"
 LOG="$DATA/maintenance.log"

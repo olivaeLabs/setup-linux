@@ -3,10 +3,11 @@
 # Script: 11-opencode-second-account.sh
 # Descrição: Instância 2 do OpenCode — CLONE do perfil normal (mesma conta Go,
 #            skills, agents, TUI/theme e ai-memory completo), com a ÚNICA
-#            diferença: NÃO carrega os MCPs pesados (hostinger-hosting,
-#            hostinger-wordpress, clickbank). Isolada em ~/.opencode-go2 (XDG
-#            próprio + porta de serviço própria) para rodar EM PARALELO ao
-#            principal sem que mexer em MCP/opencode.jsonc afete o Desktop.
+#            diferença: NÃO carrega nenhum MCP além do ai-memory — desliga
+#            hostinger-hosting, hostinger-wordpress, clickbank e google-ads.
+#            Isolada em ~/.opencode-go2 (XDG próprio + porta de serviço própria)
+#            para rodar EM PARALELO ao principal sem que mexer em
+#            MCP/opencode.jsonc afete o Desktop.
 # Origem: config derivada do canônico (single source, sem drift).
 # Idempotente. Uso: ./11-opencode-second-account.sh [porta]   (default 49376)
 # ==============================================================================
@@ -26,8 +27,8 @@ import pathlib, re, sys
 src, dst = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
 txt = src.read_text()
 estado = []
-# Desliga apenas os 3 servidores pesados; mantém ai-memory e google-ads ligados.
-for server in ("hostinger-hosting", "hostinger-wordpress", "clickbank"):
+# Desliga os MCPs pesados E o google-ads; mantém APENAS ai-memory ligado.
+for server in ("hostinger-hosting", "hostinger-wordpress", "clickbank", "google-ads"):
     txt, n = re.subn(r'("' + server + r'":\s*\{[^}]*?"enabled":\s*)true', r'\1false', txt, flags=re.S)
     estado.append(f"{server}={'off' if n else 'ja-off/sem-bloco'}")
 if '"username"' not in txt:
@@ -53,7 +54,7 @@ fi
 # --- 4. Launcher da instância 2 ---
 cat > "$HOME/.local/bin/opencode-2" <<'SH'
 #!/usr/bin/env bash
-# OpenCode — instância 2 (clone do perfil normal SEM os MCPs pesados), isolada em ~/.opencode-go2
+# OpenCode — instância 2 (clone do perfil normal, SÓ ai-memory; sem MCPs pesados nem google-ads), isolada em ~/.opencode-go2
 export XDG_CONFIG_HOME="$HOME/.opencode-go2/config"
 export XDG_DATA_HOME="$HOME/.opencode-go2/data"
 export XDG_STATE_HOME="$HOME/.opencode-go2/state"
@@ -80,6 +81,6 @@ opencode-2 service set port "$PORT" >/dev/null 2>&1 || true
 echo "Instância 2 pronta: ~/.opencode-go2 (porta $PORT)"
 echo "  - mesma conta do OpenCode Go (auth compartilhado) — sem login extra"
 echo "  - skills, agents, TUI/theme e ai-memory iguais ao perfil normal"
-echo "  - MCPs desligados: hostinger-hosting, hostinger-wordpress, clickbank"
+echo "  - MCPs desligados: hostinger-hosting, hostinger-wordpress, clickbank, google-ads"
 echo "  - abra a sessão:  opencode-2"
 echo "  - oficiais da conta 2 no medidor: ver ~/.config/ai-usagebar/config2.toml"

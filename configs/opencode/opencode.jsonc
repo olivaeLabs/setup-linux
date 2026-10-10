@@ -44,13 +44,18 @@
     "preserve_recent_tokens": 24000,
     "reserved": 16000
   },
-  // POLÍTICA DE MCP (atualizada 09/10/2026) — este é o perfil PRINCIPAL (tráfego):
-  // ai-memory + google-ads + hostinger-wordpress + hostinger-hosting + clickbank ligados.
-  // Os 2 Hostinger somam ~102 dos 131 schemas de tool e pesam no prefixo/latência.
-  // Para trabalhar SEM os MCPs pesados (hostinger-* e clickbank), use a instância `opencode-2`
-  // (~/.opencode-go2): clone deste perfil com esses três DESLIGADOS e o resto idêntico.
-  // O antigo `opencode-hosting` foi APOSENTADO em 09/10/2026 (virou no-op quando este arquivo
-  // passou a ligar os três; e o perfil gerado perdia skills/agents).
+  // POLÍTICA DE MCP (atualizada 10/10/2026) — perfil PRINCIPAL (Desktop + TUI):
+  // Ligados por padrão: ai-memory + google-ads. DESLIGADOS: hostinger-wordpress,
+  // hostinger-hosting e clickbank (os 2 Hostinger somavam ~102 dos 131 schemas de tool e
+  // pesavam no prefixo/latência; o ClickBank idem). Decisão do dono em 10/10/2026.
+  // Por que gravar AQUI e não pela interface: o "Toggle MCPs" do Desktop só faz
+  // connect/disconnect em RUNTIME (/api/experimental/mcp/<nome>/{connect,disconnect}) e NÃO
+  // grava no arquivo — por isso os toggles "voltavam ligados" depois de reiniciar o servidor.
+  // O arquivo é a fonte da verdade; edite-o e reinicie o servidor/app para aplicar.
+  // Para usar Hostinger/ClickBank num projeto específico: crie `.opencode/opencode.json` no
+  // projeto reabilitando o MCP (escopo por projeto) ou ligue por sessão.
+  // A instância `opencode-2` (~/.opencode-go2) era o clone "sem os 3 pesados"; agora coincide
+  // com este perfil (mantida por compatibilidade). O `opencode-hosting` foi APOSENTADO em 09/10.
   // Gate de conta real: docs/PEDIDO-AUTORIZACAO-GATE-CONTA-REAL.md (anubis-gofu).
   "mcp": {
     // Fix 08/10/2026: o binário direto NÃO carregava o token (cofre hostinger.env), então o MCP
@@ -62,7 +67,7 @@
         "-c",
         "set -a; . /home/marcos/.config/anubis/hostinger.env; set +a; exec /home/marcos/.local/share/fnm/aliases/default/bin/node /home/marcos/.local/share/fnm/aliases/default/bin/hostinger-wordpress-mcp"
       ],
-      "enabled": true,
+      "enabled": false,
       "environment": {
         "DEBUG": "false"
       }
@@ -76,7 +81,7 @@
         "-c",
         "set -a; . /home/marcos/.config/anubis/hostinger.env; set +a; exec /home/marcos/.local/share/fnm/aliases/default/bin/node /home/marcos/.local/share/fnm/aliases/default/bin/hostinger-hosting-mcp"
       ],
-      "enabled": true,
+      "enabled": false,
       "environment": {
         "DEBUG": "false"
       }
@@ -91,13 +96,15 @@
       ],
       "enabled": true
     },
-    // REABILITADO em 08/10/2026 por autorização expressa do dono (diagnóstico read-only).
+    // DESLIGADO por padrão em 10/10/2026 (decisão do dono): o Desktop deve subir leve, só com
+    // google-ads + ai-memory. Para reabilitar num projeto, use `.opencode/opencode.json` local
+    // ou ligue por sessão. (Estava REABILITADO desde 08/10/2026 para diagnóstico read-only.)
     "clickbank": {
       "type": "local",
       "command": [
         "/home/marcos/.config/clickbank-mcp/run.sh"
       ],
-      "enabled": true
+      "enabled": false
     },
     // Playwright MCP — DESABILITADO por padrão. Roteamento (AGENTS.md):
     // browser-harness (Go) é o padrão; habilite por sessão só a pedido do operador.

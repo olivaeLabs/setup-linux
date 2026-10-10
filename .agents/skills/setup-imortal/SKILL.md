@@ -23,6 +23,9 @@ Esta skill atua como o arquiteto e mantenedor do **Setup Imortal** (`/home/marco
   * Manutenção de SSD: `fstrim.timer` habilitado.
   * Otimização de boot: `NetworkManager-wait-online.service` e `ModemManager.service` desativados.
   * Pacman tweaks: `Color`, `ParallelDownloads = 5`, `ILoveCandy`.
+  * **Atalhos do KDE**: manter o padrão — **Visão Geral = `Super+W`**, **`Super` sozinha =
+    Lançador**. A "`Super` sozinha" ("modifier-only") **não** dispara a Visão Geral no Plasma
+    6.7.4/X11 (medido 10/10/2026). Ver `knowledge/TECHNICAL-DECISIONS.md` §"Atalhos do KDE Plasma".
 
 ---
 

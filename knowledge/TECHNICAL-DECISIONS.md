@@ -61,3 +61,28 @@
 - No **Plasma ≥ 6.1** atalhos de "modificador sozinho" vivem no `kglobalshortcutsrc`; a antiga
   seção `[ModifierOnlyShortcuts]` do `kwinrc` foi abandonada (ignorada).
 
+## Microfone / transcrição por voz (dictation) no BigLinux
+
+- **Causa raiz medida (11/10/2026)** de "transcrição péssima": o **mic interno (HDA/ALC270) estava
+  clipando** — `Internal Mic Boost` = +24 dB e `Capture` = +30 dB (~+54 dB total) → `max_volume`
+  0,0 dB. **Não era o modelo.**
+- **Fix aplicado**: `amixer -c 0 sset 'Internal Mic Boost' 0` e `amixer -c 0 sset 'Capture' 15`
+  (6 dB) → `max ~ -9 dB`, sem clipping; a fala transcreve correta. Rollback: `... 2` / `... 31`.
+  Persistir após reboot: `sudo alsactl store`.
+- **Não subir o ganho de volta**: o mic capta forte o **cooler** do notebook; `Capture` 18/24 volta
+  a clipar/dominar. Solução real para este hardware: **mic de headset**.
+- **Modelo**: o ditado usa `whisper-large-v3` (o mais preciso; `-turbo` = mais rápido, não melhor).
+  Config em `~/.config/dictation/config.ini` (device fixo = `alsa_input.pci-0000_00_1b.0.analog-stereo`).
+- **Bluetooth**: como o `device` é fixo, conectar headset BT **não** muda o ditado (segue no mic
+  interno); só troca o mic das chamadas.
+- Detalhe completo (diagnóstico + testes): memória do projeto — gotchas
+  `dictation-mic-clipping-ganho-alto` e `dictation-transcricao-ruim-microfone-mudo`.
+
+## Agente OpenCode 2: o XDG_CONFIG_HOME vaza para processos filhos
+
+- O shell do OpenCode 2 exporta `XDG_CONFIG_HOME=~/.opencode-go2/config`; processos filhos herdam e
+  ferramentas XDG-aware leem a config errada. Sintoma: `gh` fica "not logged in" (procura
+  `$XDG_CONFIG_HOME/gh/hosts.yml`) e `git push` falha com "could not read Username".
+- **Fix permanente aplicado (11/10/2026)**: `ln -sfn ~/.config/gh ~/.opencode-go2/config/gh`.
+- Pontual por comando: `export GH_CONFIG_DIR=~/.config/gh` ou `XDG_CONFIG_HOME=~/.config ...`.
+

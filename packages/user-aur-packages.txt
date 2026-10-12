@@ -3,6 +3,7 @@ antigravity
 antigravity-cli
 antigravity-ide
 ayugram-desktop-bin
+claude-desktop
 clock-tui-bin
 cursor-bin
 ghpending-bin

@@ -1,0 +1,2 @@
+ms-azuretools.vscode-containers
+ms-vscode-remote.remote-containers

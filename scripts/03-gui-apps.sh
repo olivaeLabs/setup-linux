@@ -103,4 +103,17 @@ if [ -n "$AUR_HELPER" ]; then
     log_success "Aplicativos de produtividade sincronizados!"
 fi
 
+# 5. Claude Desktop (app oficial da Anthropic para Linux; o AUR reempacota o .deb oficial verificado)
+if ! command -v claude-desktop &>/dev/null; then
+    log_info "Instalando Claude Desktop via AUR ($AUR_HELPER)..."
+    if [ -n "$AUR_HELPER" ]; then
+        $AUR_HELPER -S --needed --noconfirm claude-desktop || true
+    fi
+    if command -v claude-desktop &>/dev/null; then
+        log_success "Claude Desktop instalado com sucesso!"
+    fi
+else
+    log_success "Claude Desktop já está instalado: $(pacman -Q claude-desktop 2>/dev/null | awk '{print $2}' || echo 'disponível')"
+fi
+
 log_success "Etapa 03 concluída com sucesso!"

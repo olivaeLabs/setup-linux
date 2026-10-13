@@ -174,3 +174,6 @@ if [ -n "$WSL_DISTRO_NAME" ] && [ -x "$VSCODE_WIN_BIN/code" ]; then
   esac
 fi
 unset VSCODE_WIN_BIN
+# >>> anthropic key >>>
+[ -f "$HOME/.config/anubis/anthropic.env" ] && . "$HOME/.config/anubis/anthropic.env"
+# <<< anthropic key <<<

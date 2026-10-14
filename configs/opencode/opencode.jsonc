@@ -136,11 +136,7 @@
         "/home/marcos/.local/bin/rea",
         "mcp"
       ],
-      "enabled": true,
-      "environment": {
-        "GHIDRA_INSTALL_DIR": "/opt/ghidra",
-        "JAVA_HOME": "/home/marcos/.sdkman/candidates/java/21.0.12+1.1-tem"
-      }
+      "enabled": true
     }
   },
   "permission": {

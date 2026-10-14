@@ -129,14 +129,6 @@
       "url": "http://memory.olivae.lan:49374/mcp",
       "headers": { "Authorization": "Bearer {file:/home/marcos/.config/anubis/ai-memory.token}" },
       "enabled": true
-    },
-    "rea": {
-      "type": "local",
-      "command": [
-        "/home/marcos/.local/bin/rea",
-        "mcp"
-      ],
-      "enabled": true
     }
   },
   "permission": {

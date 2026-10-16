@@ -177,3 +177,10 @@ unset VSCODE_WIN_BIN
 # >>> anthropic key >>>
 [ -f "$HOME/.config/anubis/anthropic.env" ] && . "$HOME/.config/anubis/anthropic.env"
 # <<< anthropic key <<<
+
+# ai-memory central configuration
+if [ -f "$HOME/.config/environment.d/ai-memory.conf" ]; then
+  set -a
+  . "$HOME/.config/environment.d/ai-memory.conf"
+  set +a
+fi

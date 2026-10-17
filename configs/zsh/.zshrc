@@ -184,3 +184,8 @@ if [ -f "$HOME/.config/environment.d/ai-memory.conf" ]; then
   . "$HOME/.config/environment.d/ai-memory.conf"
   set +a
 fi
+
+# Claude Code: o app desktop exporta DISABLE_AUTOUPDATER=1 para o CLI embutido e TODO processo aberto a partir dele herda
+# (inclusive as abas do tmux das frentes). Shell interativo descarta a herança ⇒ o `claude` do terminal/tmux se atualiza sozinho.
+# O app desktop não passa por aqui e segue gerenciando a própria versão. (dono, 17/10/2026)
+unset DISABLE_AUTOUPDATER

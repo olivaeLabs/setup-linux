@@ -189,3 +189,15 @@ fi
 # (inclusive as abas do tmux das frentes). Shell interativo descarta a herança ⇒ o `claude` do terminal/tmux se atualiza sozinho.
 # O app desktop não passa por aqui e segue gerenciando a própria versão. (dono, 17/10/2026)
 unset DISABLE_AUTOUPDATER
+
+# --- Claude Code (harness): zsh previsível como o bash (dono, 22/10/2026) ---
+# O Claude Code roda os comandos dele neste zsh e as regras do zsh que o bash não tem quebravam
+# comandos de agente: `$var` não separa em palavras (go test $pkgs virava 1 argumento), `ls` é alias
+# do eza, `==` expande como caminho e glob sem resultado dá erro ("no matches found").
+# Só vale DENTRO do Claude Code (CLAUDECODE=1): o seu terminal pessoal NÃO muda.
+if [[ -n "$CLAUDECODE" ]]; then
+  unalias -a 2>/dev/null     # sem ls=eza e afins: o agente espera o comando de verdade
+  setopt sh_word_split       # $var separa em palavras, como no bash
+  unsetopt nomatch           # glob sem resultado fica literal, sem erro
+  unsetopt equals            # `==` deixa de expandir como caminho de comando
+fi

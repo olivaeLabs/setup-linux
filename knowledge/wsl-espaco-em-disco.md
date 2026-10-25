@@ -9,3 +9,8 @@
 - Windows: pagefile gerenciado pelo sistema (~18 GB) pode cair para 4–8 GB com 48 GB de RAM (admin + reinício). OneDrive aparente ≠ disco usado (Files On-Demand).
 - Rotina sugerida (mensal, com OK do dono): `orphan-reaper tmp-clean`, `ci-disk-guard`, `docker image prune`, compactação do vhdx.
 - Detalhes: `Projetos/tasks/LIMPEZA-DISCO-2026-10-23/RELATORIO.md`.
+
+## Complementos (sessão de 23/10/2026)
+- Inventário do Windows sem admin: programas por `EstimatedSize` (chaves `Uninstall` de HKLM/HKCU) e tamanho de pastas ignorando placeholders do OneDrive (atributos `0x400000`/`0x40000`). Scripts `.ps1` só em ASCII, copiados para `C:\Users\marco\` e executados com `-File` (por caminho `\\wsl.localhost` o `Get-ChildItem` falha).
+- Temperatura da CPU: o WSL não enxerga sensores. Usar HWiNFO64 (`winget install --id REALiX.HWiNFO -e`, modo Sensors-only → `CPU Package`/`Core Max`) ou a tela de monitoramento da BIOS.
+- Itens de administrador (Optimize-VHD, pagefile) exigem sessão elevada no Windows; sessão do WSL não consegue.

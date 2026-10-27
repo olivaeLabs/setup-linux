@@ -1,4 +1,6 @@
 {
+  // REGRA DO DONO (26/10/2026, D119): GPT Luna só na conta do Codex; NUNCA pelo OpenCode Go (nem para teste).
+  "provider": { "opencode-go": { "blacklist": ["gpt-6-luna", "gpt-5.6-luna"] } },
   "$schema": "https://opencode.ai/config.json",
   // Política de cache (prefix caching) — decisão do operador, 2026-09-25:
   // - Modelo único para TODAS as sessões: DeepSeek V4.1 Flash (cache-read
